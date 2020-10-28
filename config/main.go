@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
@@ -12,6 +14,7 @@ var AllConfig AppConfig
 type AppConfig struct {
 	IsDevelopment bool   `envconfig:"IS_DEVELOPMENT"`
 	Port          string `envconfig:"APP_PORT"`
+	DB            DBConfig
 }
 
 // GetConfig Collects all configs
@@ -26,4 +29,15 @@ func GetConfig() AppConfig {
 	}
 
 	return AllConfig
+}
+
+// GetConfigByName Collects all configs
+func GetConfigByName(key string) string {
+	err := godotenv.Load()
+
+	if err != nil {
+		panic(err)
+	}
+
+	return os.Getenv(key)
 }
