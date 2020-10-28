@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
+	"github.com/Improwised/golang-api/routes"
 
 	"log"
 
@@ -19,14 +20,15 @@ func main() {
 	database.Connect()
 
 	// Create fiber app
-	app := fiber.New(fiber.Config{
-		Prefork: cfg.IsDevelopment, // go run app.go -prod
-	})
+	app := fiber.New(fiber.Config{})
 
 	// Middleware
 	app.Use(recover.New())
 	app.Use(logger.New())
 
+	// setup routes
+	routes.Setup(app)
+
 	// Listen on port 3000
-	log.Fatal(app.Listen(cfg.Port)) // go run app.go -port=:3000
+	log.Fatal(app.Listen(cfg.Port))
 }
