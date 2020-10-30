@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/Improwised/golang-api/config"
-	"github.com/Improwised/golang-api/database"
 	"github.com/Improwised/golang-api/routes"
 
 	"log"
@@ -15,9 +14,6 @@ import (
 func main() {
 	// Collecting config from env or file or flag
 	cfg := config.GetConfig()
-
-	// Connected with database
-	database.Connect()
 
 	// Create fiber app
 	app := fiber.New(fiber.Config{})
