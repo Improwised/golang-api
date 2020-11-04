@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"os"
 	"strconv"
 
@@ -16,7 +17,6 @@ import (
 var db *sql.DB
 var dbURL string
 var err error
-var goquReturn *goqu.Database
 
 const (
 	postgres = "postgres"
@@ -28,18 +28,14 @@ const (
 func Connect(cfg config.DBConfig) (*goqu.Database, error) {
 	switch cfg.Dialect {
 	case postgres:
-		goquReturn, err = postgresDBConnection(cfg)
+		return postgresDBConnection(cfg)
 	case mysql:
-		goquReturn, err = mysqlDBConnection(cfg)
+		return mysqlDBConnection(cfg)
 	case sqlite3:
-		goquReturn, err = sqlite3DBConnection(cfg)
+		return sqlite3DBConnection(cfg)
 	default:
-		panic("No suitable dialect found")
+		return nil, errors.New("no suitable dialect found")
 	}
-	if err != nil {
-		panic(err)
-	}
-	return goquReturn, nil
 }
 
 func sqlite3DBConnection(cfg config.DBConfig) (*goqu.Database, error) {
@@ -49,7 +45,10 @@ func sqlite3DBConnection(cfg config.DBConfig) (*goqu.Database, error) {
 		if err != nil {
 			panic(err)
 		}
-		file.Close()
+		err = file.Close()
+		if err != nil {
+			return nil, err
+		}
 	}
 	db, err = sql.Open(sqlite3, "./"+cfg.SqlliteFileName)
 	if err != nil {
