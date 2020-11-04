@@ -8,4 +8,5 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.4
+	github.com/spf13/cobra v1.1.1
 )
