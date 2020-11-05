@@ -13,8 +13,8 @@ type UserController struct {
 }
 
 // NewUserController returns a user
-func NewUserController(cfg config.AppConfig) (*UserController, error) {
-	userModel, err := models.InitUserModel(cfg.DB)
+func NewUserController(cfg config.DBConfig) (*UserController, error) {
+	userModel, err := models.InitUserModel(cfg)
 	if err != nil {
 		return nil, err
 	}

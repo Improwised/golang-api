@@ -3,10 +3,11 @@ package cli
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/Improwised/golang-api/config"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/golang-migrate/migrate/v4/source/file" // To run sqlite3 migration
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +43,13 @@ func GetMigrationCommandDef(cfg config.AppConfig) cobra.Command {
 				return err
 			}
 
-			return m.Up()
+			if err = m.Up(); err != nil {
+				if err.Error() == "no change" {
+					return nil
+				}
+			}
+
+			return nil
 		},
 	}
 
