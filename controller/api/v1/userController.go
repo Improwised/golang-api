@@ -39,14 +39,22 @@ func (ctrl *UserController) UserGet(c *fiber.Ctx) error {
 }
 
 // UserCreate registers a user
-// func UserCreate(c *fiber.Ctx) error {
-// 	user := &models.User{
-// 		Name:  c.FormValue("user"),
-// 		Email: c.FormValue("email"),
-// 	}
-// 	database.Insert(user)
-// 	return c.JSON(fiber.Map{
-// 		"success": true,
-// 		"user":    user,
-// 	})
-// }
+func (ctrl *UserController) UserCreate(c *fiber.Ctx) error {
+
+	user := &models.User{
+		FirstName: c.FormValue("first_name"),
+		LastName:  c.FormValue("last_name"),
+		Email:     c.FormValue("email"),
+	}
+	userID, err := ctrl.model.InsertUser(user)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"success": false,
+			"error":   err,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"success": true,
+		"user_id": userID,
+	})
+}
