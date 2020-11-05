@@ -20,6 +20,6 @@ func Setup(app *fiber.App, cfg config.DBConfig) {
 
 	// Bind handlers
 	v1.Get("/users", userController.UserGet)
-	v1.Post("/users", userController.UserGet)
+	v1.Post("/users", userController.UserCreate)
 	mu.Unlock()
 }

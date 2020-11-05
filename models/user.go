@@ -7,12 +7,15 @@ import (
 )
 
 // UserTable represent table name
-const UserTable = "user"
+const UserTable = "users"
 
 // User model
 type User struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at,omitempty"`
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 var users []User
@@ -39,4 +42,22 @@ func (model *UserModel) GetUser() ([]User, error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+// InsertUser retrive user
+func (model *UserModel) InsertUser(user *User) (int64, error) {
+	preparedDs := model.db.From(UserTable).Prepared(true)
+	ds, err := preparedDs.Insert().Rows(
+		goqu.Record{
+			"first_name": user.FirstName,
+			"last_name":  user.LastName,
+			"email":      user.Email,
+		}).Executor().Exec()
+
+	id, err := ds.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
