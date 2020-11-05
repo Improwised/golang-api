@@ -6,6 +6,9 @@ import (
 	"github.com/doug-martin/goqu/v9"
 )
 
+// UserTable represent table name
+const UserTable = "user"
+
 // User model
 type User struct {
 	Name  string `json:"name"`
@@ -20,8 +23,8 @@ type UserModel struct {
 }
 
 // InitUserModel Init model
-func InitUserModel(config config.DBConfig) (*UserModel, error) {
-	db, err := database.Connect(config)
+func InitUserModel(cfg config.DBConfig) (*UserModel, error) {
+	db, err := database.Connect(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +35,7 @@ func InitUserModel(config config.DBConfig) (*UserModel, error) {
 
 // GetUser retrive user
 func (model *UserModel) GetUser() ([]User, error) {
-	if err := model.db.From("user").ScanStructs(&users); err != nil {
+	if err := model.db.From(UserTable).ScanStructs(&users); err != nil {
 		return nil, err
 	}
 	return users, nil

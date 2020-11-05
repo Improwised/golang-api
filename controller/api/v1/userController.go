@@ -7,22 +7,35 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// UserController for user controller
+type UserController struct {
+	model *models.UserModel
+}
+
+// NewUserController returns a user
+func NewUserController(cfg config.AppConfig) (*UserController, error) {
+	userModel, err := models.InitUserModel(cfg.DB)
+	if err != nil {
+		return nil, err
+	}
+	return &UserController{
+		model: userModel,
+	}, nil
+}
+
 // UserGet returns a user
-func UserGet(c *fiber.Ctx) error {
-	cfg := config.DBConfig{}
-	model, err := models.InitUserModel(cfg)
-	data, err := model.GetUser()
+func (ctrl *UserController) UserGet(c *fiber.Ctx) error {
+	data, err := ctrl.model.GetUser()
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"success": false,
 			"error":   err,
 		})
-	} else {
-		return c.JSON(fiber.Map{
-			"success": true,
-			"users":   data,
-		})
 	}
+	return c.JSON(fiber.Map{
+		"success": true,
+		"users":   data,
+	})
 }
 
 // UserCreate registers a user
