@@ -16,7 +16,7 @@ func Setup(app *fiber.App, cfg config.DBConfig) {
 	// Group v1
 	v1 := app.Group("/api/v1")
 
-	userController := controller.NewUserController(cfg)
+	userController, _ := controller.NewUserController(cfg)
 
 	// Bind handlers
 	v1.Get("/users", userController.UserGet)
