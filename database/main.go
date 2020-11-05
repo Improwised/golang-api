@@ -40,8 +40,8 @@ func Connect(cfg config.DBConfig) (*goqu.Database, error) {
 
 func sqlite3DBConnection(cfg config.DBConfig) (*goqu.Database, error) {
 
-	if _, err = os.Stat(cfg.SqlliteFileName); err != nil {
-		file, err := os.Create(cfg.SqlliteFileName)
+	if _, err = os.Stat(cfg.SQLiteFilePath); err != nil {
+		file, err := os.Create(cfg.SQLiteFilePath)
 		if err != nil {
 			panic(err)
 		}
@@ -50,7 +50,7 @@ func sqlite3DBConnection(cfg config.DBConfig) (*goqu.Database, error) {
 			return nil, err
 		}
 	}
-	db, err = sql.Open(sqlite3, "./"+cfg.SqlliteFileName)
+	db, err = sql.Open(sqlite3, "./"+cfg.SQLiteFilePath)
 	if err != nil {
 		return nil, err
 	}

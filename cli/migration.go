@@ -1,12 +1,17 @@
 package cli
 
 import (
+	"database/sql"
 	"fmt"
+	"github.com/Improwised/golang-api/config"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/spf13/cobra"
 )
 
 // GetMigrationCommandDef initialize migration command
-func GetMigrationCommandDef() cobra.Command {
+func GetMigrationCommandDef(cfg config.AppConfig) cobra.Command {
 	migrateCmd := cobra.Command{
 		Use:   "migrate [sub command]",
 		Short: "To run db migrate",
@@ -20,8 +25,24 @@ func GetMigrationCommandDef() cobra.Command {
 		Short: "It will apply migration(s)",
 		Long:  `It will run all remaining migration(s)`,
 		Args:  cobra.MinimumNArgs(0),
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("migration up")
+		RunE: func(cmd *cobra.Command, args []string) error {
+
+			sqliteDb, err := sql.Open("sqlite3", cfg.DB.SQLiteFilePath)
+			if err != nil {
+				return err
+			}
+
+			driver, err := sqlite3.WithInstance(sqliteDb, &sqlite3.Config{})
+			if err != nil {
+				return err
+			}
+
+			m, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://%s", cfg.DB.MigrationDir), "main", driver)
+			if err != nil {
+				return err
+			}
+
+			return m.Up()
 		},
 	}
 
