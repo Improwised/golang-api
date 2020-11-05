@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"log"
+
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 func GetApiCommandDef(cfg config.AppConfig) cobra.Command {
@@ -24,7 +25,7 @@ func GetApiCommandDef(cfg config.AppConfig) cobra.Command {
 			app.Use(logger.New())
 
 			// setup routes
-			routes.Setup(app)
+			routes.Setup(app, cfg.DB)
 
 			// Listen on port 3000
 			log.Fatal(app.Listen(cfg.Port))
