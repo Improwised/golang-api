@@ -6,7 +6,7 @@ import (
 )
 
 func Init(cfg config.AppConfig) error {
-	migrationCmd := GetMigrationCommandDef()
+	migrationCmd := GetMigrationCommandDef(cfg)
 	apiCmd := GetApiCommandDef(cfg)
 
 	rootCmd := &cobra.Command{Use: "golang-api"}
