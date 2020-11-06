@@ -1,8 +1,6 @@
 package models
 
 import (
-	"github.com/Improwised/golang-api/config"
-	"github.com/Improwised/golang-api/database"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/rs/xid"
 )
@@ -25,13 +23,9 @@ type UserModel struct {
 }
 
 // InitUserModel Init model
-func InitUserModel(cfg config.DBConfig) (*UserModel, error) {
-	db, err := database.Connect(cfg)
-	if err != nil {
-		return nil, err
-	}
+func InitUserModel(goqu *goqu.Database) (*UserModel, error) {
 	return &UserModel{
-		db: db,
+		db: goqu,
 	}, nil
 }
 

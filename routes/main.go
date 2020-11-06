@@ -3,15 +3,15 @@ package routes
 import (
 	"sync"
 
-	"github.com/Improwised/golang-api/config"
 	controller "github.com/Improwised/golang-api/controller/api/v1"
+	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v2"
 )
 
 var mu sync.Mutex
 
 // Setup func
-func Setup(app *fiber.App, cfg config.DBConfig) {
+func Setup(app *fiber.App, goqu *goqu.Database) {
 	mu.Lock()
 	// Group v1
 	api := app.Group("/api")
@@ -22,7 +22,7 @@ func Setup(app *fiber.App, cfg config.DBConfig) {
 		return c.Next()
 	})
 
-	userController, _ := controller.NewUserController(cfg)
+	userController, _ := controller.NewUserController(goqu)
 
 	// Bind handlers
 	v1.Get("/users", userController.UserGet)
