@@ -14,7 +14,7 @@ bin
 *.vi
 *~
 *.sass-cache
-*.SQLite3
+*.db
 
 # OS or Editor folders
 .DS_Store
