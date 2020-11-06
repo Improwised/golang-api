@@ -19,19 +19,19 @@ var dbURL string
 var err error
 
 const (
-	postgres = "postgres"
-	mysql    = "mysql"
-	sqlite3  = "sqlite3"
+	POSTGRES = "postgres"
+	MYSQL    = "mysql"
+	SQLITE3  = "sqlite3"
 )
 
 // Connect with database
 func Connect(cfg config.DBConfig) (*goqu.Database, error) {
 	switch cfg.Dialect {
-	case postgres:
+	case POSTGRES:
 		return postgresDBConnection(cfg)
-	case mysql:
+	case MYSQL:
 		return mysqlDBConnection(cfg)
-	case sqlite3:
+	case SQLITE3:
 		return sqlite3DBConnection(cfg)
 	default:
 		return nil, errors.New("no suitable dialect found")
@@ -50,33 +50,33 @@ func sqlite3DBConnection(cfg config.DBConfig) (*goqu.Database, error) {
 			return nil, err
 		}
 	}
-	db, err = sql.Open(sqlite3, "./"+cfg.SQLiteFilePath)
+	db, err = sql.Open(SQLITE3, "./"+cfg.SQLiteFilePath)
 	if err != nil {
 		return nil, err
 	}
-	return goqu.New(sqlite3, db), err
+	return goqu.New(SQLITE3, db), err
 }
 
 func mysqlDBConnection(cfg config.DBConfig) (*goqu.Database, error) {
 	dbURL = cfg.Username + ":" + cfg.Password + "@tcp(" + cfg.Host + ":" + strconv.Itoa(cfg.Port) + ")/" + cfg.Db
 	if db == nil {
-		db, err = sql.Open(mysql, dbURL)
+		db, err = sql.Open(MYSQL, dbURL)
 		if err != nil {
 			return nil, err
 		}
-		return goqu.New(mysql, db), err
+		return goqu.New(MYSQL, db), err
 	}
-	return goqu.New(mysql, db), err
+	return goqu.New(MYSQL, db), err
 }
 
 func postgresDBConnection(cfg config.DBConfig) (*goqu.Database, error) {
 	dbURL = "postgres://" + cfg.Username + ":" + cfg.Password + "@" + cfg.Host + ":" + strconv.Itoa(cfg.Port) + "/" + cfg.Db + "?" + cfg.QueryString
 	if db == nil {
-		db, err = sql.Open(postgres, dbURL)
+		db, err = sql.Open(POSTGRES, dbURL)
 		if err != nil {
 			return nil, err
 		}
-		return goqu.New(postgres, db), err
+		return goqu.New(POSTGRES, db), err
 	}
-	return goqu.New(postgres, db), err
+	return goqu.New(POSTGRES, db), err
 }

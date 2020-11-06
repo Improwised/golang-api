@@ -18,8 +18,6 @@ type User struct {
 	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
-var users []User
-
 // UserModel implements user related database operations
 type UserModel struct {
 	db *goqu.Database
@@ -38,6 +36,7 @@ func InitUserModel(cfg config.DBConfig) (*UserModel, error) {
 
 // GetUser retrive user
 func (model *UserModel) GetUser() ([]User, error) {
+	var users []User
 	if err := model.db.From(UserTable).ScanStructs(&users); err != nil {
 		return nil, err
 	}
@@ -53,6 +52,9 @@ func (model *UserModel) InsertUser(user *User) (int64, error) {
 			"last_name":  user.LastName,
 			"email":      user.Email,
 		}).Executor().Exec()
+	if err != nil {
+		return 0, err
+	}
 
 	id, err := ds.LastInsertId()
 	if err != nil {
