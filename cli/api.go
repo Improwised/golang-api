@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Improwised/golang-api/config"
+	"github.com/Improwised/golang-api/database"
 	"github.com/Improwised/golang-api/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -30,8 +31,12 @@ func GetAPICommandDef(cfg config.AppConfig) cobra.Command {
 			// 	SigningKey: []byte("secret"),
 			// }))
 
+			db, err := database.Connect(cfg.DB)
+			if err != nil {
+				panic(err)
+			}
 			// setup routes
-			routes.Setup(app, cfg.DB)
+			routes.Setup(app, db)
 
 			// Listen on port 3000
 			log.Fatal(app.Listen(cfg.Port))

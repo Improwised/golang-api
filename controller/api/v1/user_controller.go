@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/models"
+	"github.com/doug-martin/goqu/v9"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -13,8 +13,8 @@ type UserController struct {
 }
 
 // NewUserController returns a user
-func NewUserController(cfg config.DBConfig) (*UserController, error) {
-	userModel, err := models.InitUserModel(cfg)
+func NewUserController(goqu *goqu.Database) (*UserController, error) {
+	userModel, err := models.InitUserModel(goqu)
 	if err != nil {
 		return nil, err
 	}
