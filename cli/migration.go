@@ -3,11 +3,12 @@ package cli
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/mysql"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/database/mysql"    // To run mysql migration
+	_ "github.com/golang-migrate/migrate/v4/database/postgres" // To run postgres migration
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file" // To run sqlite3 migration
 	"github.com/spf13/cobra"
@@ -29,9 +30,12 @@ func GetMigrationCommandDef(cfg config.AppConfig) cobra.Command {
 		Long:  `It will run all remaining migration(s)`,
 		Args:  cobra.MinimumNArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Run test db migration
+			createTestingDBMigration(cfg, "UP")
+
 			switch cfg.DB.Dialect {
 			case database.SQLITE3:
-				return runSQLiteMigration(cfg, "UP")
+				return runSQLiteMigration(cfg, "UP", false, "")
 			case database.POSTGRES:
 				return runPostgresMigration(cfg, "UP")
 			case database.MYSQL:
@@ -46,8 +50,19 @@ func GetMigrationCommandDef(cfg config.AppConfig) cobra.Command {
 		Short: "It will revert migration(s)",
 		Long:  `It will run all remaining migration(s)`,
 		Args:  cobra.MinimumNArgs(0),
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("migration down")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Run test db migration
+			createTestingDBMigration(cfg, "DOWN")
+
+			switch cfg.DB.Dialect {
+			case database.SQLITE3:
+				return runSQLiteMigration(cfg, "DOWN", false, "")
+			case database.POSTGRES:
+				return runPostgresMigration(cfg, "DOWN")
+			case database.MYSQL:
+				return runMySQLMigration(cfg, "DOWN")
+			}
+			return nil
 		},
 	}
 	migrateCmd.AddCommand(&migrateUp, &migrateDown)
@@ -56,8 +71,18 @@ func GetMigrationCommandDef(cfg config.AppConfig) cobra.Command {
 	return migrateCmd
 }
 
-func runSQLiteMigration(cfg config.AppConfig, migrationType string) error {
-	sqliteDb, err := sql.Open("sqlite3", cfg.DB.SQLiteFilePath)
+func createTestingDBMigration(cfg config.AppConfig, migrationType string) {
+	if cfg.Env == "local" {
+		runSQLiteMigration(cfg, migrationType, true, "database/go-test-db.db")
+	}
+}
+
+func runSQLiteMigration(cfg config.AppConfig, migrationType string, testDB bool, testDBPath string) error {
+	var sqliteDBPath = cfg.DB.SQLiteFilePath
+	if testDB {
+		sqliteDBPath = testDBPath
+	}
+	sqliteDb, err := sql.Open("sqlite3", sqliteDBPath)
 	if err != nil {
 		return err
 	}

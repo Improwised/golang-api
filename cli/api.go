@@ -11,7 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetApiCommandDef(cfg config.AppConfig) cobra.Command {
+// GetAPICommandDef runs app
+func GetAPICommandDef(cfg config.AppConfig) cobra.Command {
 	apiCommand := cobra.Command{
 		Use:   "api",
 		Short: "To start api",
@@ -23,6 +24,11 @@ func GetApiCommandDef(cfg config.AppConfig) cobra.Command {
 			// Middleware
 			app.Use(recover.New())
 			app.Use(logger.New())
+
+			// JWT Middleware
+			// app.Use(jwtware.New(jwtware.Config{
+			// 	SigningKey: []byte("secret"),
+			// }))
 
 			// setup routes
 			routes.Setup(app, cfg.DB)

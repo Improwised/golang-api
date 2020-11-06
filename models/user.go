@@ -4,6 +4,7 @@ import (
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
 	"github.com/doug-martin/goqu/v9"
+	"github.com/rs/xid"
 )
 
 // UserTable represent table name
@@ -11,11 +12,11 @@ const UserTable = "users"
 
 // User model
 type User struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	CreatedAt string `json:"created_at,omitempty"`
-	UpdatedAt string `json:"updated_at,omitempty"`
+	FirstName string `db:"first_name"`
+	LastName  string `db:"last_name"`
+	Email     string `db:"email"`
+	CreatedAt string `db:"created_at,omitempty"`
+	UpdatedAt string `db:"updated_at,omitempty"`
 }
 
 // UserModel implements user related database operations
@@ -44,21 +45,19 @@ func (model *UserModel) GetUser() ([]User, error) {
 }
 
 // InsertUser retrive user
-func (model *UserModel) InsertUser(user *User) (int64, error) {
-	preparedDs := model.db.From(UserTable).Prepared(true)
-	ds, err := preparedDs.Insert().Rows(
+func (model *UserModel) InsertUser(user *User) (string, error) {
+	var id string
+	ds := model.db.Insert(UserTable).Returning(goqu.C("id")).Rows(
 		goqu.Record{
+			"id":         xid.New().String(),
 			"first_name": user.FirstName,
 			"last_name":  user.LastName,
 			"email":      user.Email,
-		}).Executor().Exec()
-	if err != nil {
-		return 0, err
-	}
+		}).Executor()
 
-	id, err := ds.LastInsertId()
+	_, err := ds.ScanVal(&id)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	return id, nil
