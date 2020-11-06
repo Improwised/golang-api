@@ -14,7 +14,13 @@ var mu sync.Mutex
 func Setup(app *fiber.App, cfg config.DBConfig) {
 	mu.Lock()
 	// Group v1
-	v1 := app.Group("/api/v1")
+	api := app.Group("/api")
+	v1 := api.Group("/v1", func(c *fiber.Ctx) error {
+		c.JSON(fiber.Map{
+			"message": "v1",
+		})
+		return c.Next()
+	})
 
 	userController, _ := controller.NewUserController(cfg)
 
