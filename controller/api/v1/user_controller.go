@@ -1,8 +1,11 @@
 package v1
 
 import (
+	"encoding/json"
 	"github.com/Improwised/golang-api/models"
+	"github.com/Improwised/golang-api/utils"
 	"github.com/doug-martin/goqu/v9"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,42 +22,61 @@ func NewUserController(goqu *goqu.Database) (*UserController, error) {
 		return nil, err
 	}
 	return &UserController{
-		model: userModel,
+		model: &userModel,
 	}, nil
 }
 
 // UserGet returns a user
+// swagger:route GET /users USERS
+//
+// For retrieve users.
+//
+//     Consumes:
+//     - application/json
+//
+//     Schemes: http, https
+//
+//     Responses:
+//       200: getUsersResponse
+//       404: genericError
+//		 500: genericError
 func (ctrl *UserController) UserGet(c *fiber.Ctx) error {
 	data, err := ctrl.model.GetUser()
 	if err != nil {
-		return c.JSON(fiber.Map{
-			"success": false,
-			"error":   err,
-		})
+		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(fiber.Map{
-		"success": true,
-		"users":   data,
-	})
+	if data != nil {
+		return utils.JSONWrite(c, http.StatusOK, data)
+	} else {
+		return utils.JSONError(c, http.StatusNotFound, "no user found")
+	}
 }
 
 // UserCreate registers a user
+// swagger:route POST /users USERS createUserRequest
+//
+// For create new user.
+//
+//     Consumes:
+//     - application/json
+//
+//     Schemes: http, https
+//
+//     Responses:
+//       201: createUserResponse
+//       500: genericError
 func (ctrl *UserController) UserCreate(c *fiber.Ctx) error {
 
-	user := &models.User{
-		FirstName: c.FormValue("first_name"),
-		LastName:  c.FormValue("last_name"),
-		Email:     c.FormValue("email"),
-	}
-	userID, err := ctrl.model.InsertUser(user)
+	var user models.User
+
+	err := json.Unmarshal(c.Body(), &user)
 	if err != nil {
-		return c.JSON(fiber.Map{
-			"success": false,
-			"error":   err,
-		})
+		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(fiber.Map{
-		"success": true,
-		"user_id": userID,
-	})
+
+	err = ctrl.model.InsertUser(&user)
+	if err != nil {
+		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
+	}
+	return utils.JSONWrite(c, http.StatusCreated, user)
 }
