@@ -1,0 +1,189 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "/users": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "summary": "For retrieve users.",
+        "operationId": "USERS",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getUsersResponse"
+          },
+          "404": {
+            "$ref": "#/responses/genericError"
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "USERS"
+        ],
+        "summary": "For create new user.",
+        "operationId": "createUserRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "x-go-name": "Email"
+                },
+                "first_name": {
+                  "type": "string",
+                  "x-go-name": "FirstName"
+                },
+                "last_name": {
+                  "type": "string",
+                  "x-go-name": "LastName"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/createUserResponse"
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "description": "User model",
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "x-go-name": "CreatedAt"
+        },
+        "email": {
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "first_name": {
+          "type": "string",
+          "x-go-name": "FirstName"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "last_name": {
+          "type": "string",
+          "x-go-name": "LastName"
+        },
+        "updated_at": {
+          "type": "string",
+          "x-go-name": "UpdatedAt"
+        }
+      },
+      "x-go-package": "github.com/Improwised/golang-api/models"
+    }
+  },
+  "responses": {
+    "createUserResponse": {
+      "description": "UserCreateResponseWrapper for create user response",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/definitions/User"
+          }
+        }
+      }
+    },
+    "genericError": {
+      "description": "SwaggerGenericErrorResponse is store swagger generic error response",
+      "schema": {
+        "type": "object",
+        "required": [
+          "status",
+          "status_code",
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "x-go-name": "Error",
+            "example": "Invalid value for x"
+          },
+          "status": {
+            "type": "string",
+            "x-go-name": "Status",
+            "example": "Error"
+          },
+          "status_code": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "StatusCode",
+            "example": 400
+          }
+        }
+      }
+    },
+    "genericResponse": {
+      "description": "SwaggerGenericSuccessResponse is store swagger generic response",
+      "schema": {
+        "type": "object",
+        "required": [
+          "status",
+          "status_code",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "x-go-name": "Message",
+            "example": "ok"
+          },
+          "status": {
+            "type": "string",
+            "x-go-name": "Status",
+            "example": "Success"
+          },
+          "status_code": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "StatusCode",
+            "example": 200
+          }
+        }
+      }
+    },
+    "getUsersResponse": {
+      "description": "UserGetResponseWrapper for get user response",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/definitions/User"
+          }
+        }
+      }
+    }
+  }
+}

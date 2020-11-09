@@ -5,8 +5,8 @@ go 1.15
 require (
 	github.com/andybalholm/brotli v1.0.1 // indirect
 	github.com/doug-martin/goqu/v9 v9.10.0
+	github.com/getsentry/sentry-go v0.7.0 // indirect
 	github.com/gofiber/fiber/v2 v2.1.4
-	github.com/gofiber/jwt/v2 v2.0.1 // indirect
 	github.com/golang-migrate/migrate/v4 v4.13.0
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
