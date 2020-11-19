@@ -3,14 +3,11 @@ package cli
 import (
 	"database/sql"
 	"fmt"
-
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/mysql"    // To run mysql migration
-	_ "github.com/golang-migrate/migrate/v4/database/postgres" // To run postgres migration
-	"github.com/golang-migrate/migrate/v4/database/sqlite3"
-	_ "github.com/golang-migrate/migrate/v4/source/file" // To run sqlite3 migration
+	_ "github.com/go-sql-driver/mysql" // for mysql dialect
+	_ "github.com/lib/pq"              // for postgres dialect
+	"github.com/rubenv/sql-migrate"
 	"github.com/spf13/cobra"
 )
 
@@ -78,64 +75,55 @@ func createTestingDBMigration(cfg config.AppConfig, migrationType string) {
 }
 
 func runSQLiteMigration(cfg config.AppConfig, migrationType string, testDB bool, testDBPath string) error {
-	var sqliteDBPath = cfg.DB.SQLiteFilePath
+	var migrations migrate.FileMigrationSource
 	if testDB {
-		sqliteDBPath = testDBPath
-	}
-	sqliteDb, err := sql.Open("sqlite3", sqliteDBPath)
-	if err != nil {
-		return err
-	}
-
-	driver, err := sqlite3.WithInstance(sqliteDb, &sqlite3.Config{})
-	if err != nil {
-		return err
+		migrations = migrate.FileMigrationSource{
+			Dir: testDBPath,
+		}
+	} else {
+		migrations = migrate.FileMigrationSource{
+			Dir: cfg.DB.MigrationDir,
+		}
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://%s", cfg.DB.MigrationDir), "main", driver)
+	db, err := sql.Open(database.SQLITE3, cfg.DB.SQLiteFilePath)
 	if err != nil {
 		return err
 	}
 
 	if migrationType == "UP" {
-		if err = m.Up(); err != nil {
-			if err.Error() == "no change" {
-				return nil
-			}
+		_, err = migrate.Exec(db, database.SQLITE3, migrations, migrate.Up)
+		if err != nil {
 			return err
 		}
 	} else {
-		if err = m.Down(); err != nil {
-			if err.Error() == "no change" {
-				return nil
-			}
+		_, err = migrate.Exec(db, database.SQLITE3, migrations, migrate.Down)
+		if err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
 func runMySQLMigration(cfg config.AppConfig, migrationType string) error {
-	m, err := migrate.New(
-		"file://"+cfg.DB.MigrationDir,
-		fmt.Sprintf("mysql://%s:%s@tcp(%s:%d)/%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Db),
-	)
+	migrations := migrate.FileMigrationSource{
+		Dir: cfg.DB.MigrationDir,
+	}
+
+	db, err := sql.Open(database.MYSQL, fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Db, cfg.DB.QueryString))
 	if err != nil {
 		return err
 	}
 
 	if migrationType == "UP" {
-		if err = m.Up(); err != nil {
-			if err.Error() == "no change" {
-				return nil
-			}
+		_, err = migrate.Exec(db, database.MYSQL, migrations, migrate.Up)
+		if err != nil {
 			return err
 		}
 	} else {
-		if err = m.Down(); err != nil {
-			if err.Error() == "no change" {
-				return nil
-			}
+		_, err = migrate.Exec(db, database.MYSQL, migrations, migrate.Down)
+		if err != nil {
 			return err
 		}
 	}
@@ -144,26 +132,23 @@ func runMySQLMigration(cfg config.AppConfig, migrationType string) error {
 }
 
 func runPostgresMigration(cfg config.AppConfig, migrationType string) error {
-	m, err := migrate.New(
-		"file://"+cfg.DB.MigrationDir,
-		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Db, cfg.DB.QueryString),
-	)
+	migrations := migrate.FileMigrationSource{
+		Dir: cfg.DB.MigrationDir,
+	}
+
+	db, err := sql.Open(database.POSTGRES, fmt.Sprintf("postgres://%s:%s@%s:%d/%s?%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Db, cfg.DB.QueryString))
 	if err != nil {
 		return err
 	}
 
 	if migrationType == "UP" {
-		if err = m.Up(); err != nil {
-			if err.Error() == "no change" {
-				return nil
-			}
+		_, err = migrate.Exec(db, database.POSTGRES, migrations, migrate.Up)
+		if err != nil {
 			return err
 		}
 	} else {
-		if err = m.Down(); err != nil {
-			if err.Error() == "no change" {
-				return nil
-			}
+		_, err = migrate.Exec(db, database.POSTGRES, migrations, migrate.Down)
+		if err != nil {
 			return err
 		}
 	}
