@@ -2,11 +2,14 @@ package v1
 
 import (
 	"encoding/json"
+	"net/http"
+
+	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/models"
 	"github.com/Improwised/golang-api/utils"
 	"github.com/doug-martin/goqu/v9"
-	"net/http"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -47,9 +50,8 @@ func (ctrl *UserController) UserGet(c *fiber.Ctx) error {
 	}
 	if data != nil {
 		return utils.JSONWrite(c, http.StatusOK, data)
-	} else {
-		return utils.JSONError(c, http.StatusNotFound, "no user found")
 	}
+	return utils.JSONError(c, http.StatusNotFound, "no user found")
 }
 
 // UserCreate registers a user
@@ -78,5 +80,31 @@ func (ctrl *UserController) UserCreate(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
 	}
-	return utils.JSONWrite(c, http.StatusCreated, user)
+	return utils.JSONWrite(c, http.StatusCreated, user.ID)
+}
+
+// DoAuth returns auth user
+func (ctrl *UserController) DoAuth(c *fiber.Ctx) error {
+	var secret = config.GetConfigByName("JWT_SECRET")
+	data, err := ctrl.model.GetUser()
+	if err != nil {
+		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
+	}
+	if data != nil {
+		// Create token
+		token := jwt.New(jwt.SigningMethodHS256)
+
+		// Set claims
+		claims := token.Claims.(jwt.MapClaims)
+		claims["name"] = "John Doe"
+
+		// Generate encoded token and send it as response.
+		t, err := token.SignedString([]byte(secret))
+		if err != nil {
+			return c.SendStatus(http.StatusInternalServerError)
+		}
+
+		return c.JSON(fiber.Map{"token": t})
+	}
+	return utils.JSONError(c, http.StatusNotFound, "no user found")
 }

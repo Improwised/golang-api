@@ -14,6 +14,8 @@ type User struct {
 	FirstName string `json:"first_name" db:"first_name" validate:"required"`
 	LastName  string `json:"last_name" db:"last_name" validate:"required"`
 	Email     string `json:"email" db:"email" validate:"required"`
+	Password  string `json:"password" db:"password"`
+	Roles     string `json:"roles" db:"roles"`
 	CreatedAt string `json:"created_at" db:"created_at,omitempty"`
 	UpdatedAt string `json:"updated_at" db:"updated_at,omitempty"`
 }
@@ -41,15 +43,17 @@ func (model *UserModel) GetUser() ([]User, error) {
 
 // InsertUser retrieve user
 func (model *UserModel) InsertUser(user *User) error {
-	ds := model.db.Insert(UserTable).Returning(goqu.C("id")).Rows(
+	user.ID = xid.New().String()
+	insert, err := model.db.Insert(UserTable).Rows(
 		goqu.Record{
-			"id":         xid.New().String(),
+			"id":         user.ID,
 			"first_name": user.FirstName,
 			"last_name":  user.LastName,
 			"email":      user.Email,
-		}).Executor()
+		},
+	).Executor().Exec()
 
-	_, err := ds.ScanVal(&user.ID)
+	_, err = insert.RowsAffected()
 	if err != nil {
 		return err
 	}
