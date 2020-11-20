@@ -69,24 +69,21 @@ func GetMigrationCommandDef(cfg config.AppConfig) cobra.Command {
 }
 
 func createTestingDBMigration(cfg config.AppConfig, migrationType string) {
-	if cfg.Env == "local" {
+	if cfg.Env == "local" || cfg.Env == "testing" {
 		runSQLiteMigration(cfg, migrationType, true, "database/go-test-db.db")
 	}
 }
 
 func runSQLiteMigration(cfg config.AppConfig, migrationType string, testDB bool, testDBPath string) error {
-	var migrations migrate.FileMigrationSource
+	var migrations = migrate.FileMigrationSource{
+		Dir: cfg.DB.MigrationDir,
+	}
+	var dbPath = cfg.DB.SQLiteFilePath
 	if testDB {
-		migrations = migrate.FileMigrationSource{
-			Dir: testDBPath,
-		}
-	} else {
-		migrations = migrate.FileMigrationSource{
-			Dir: cfg.DB.MigrationDir,
-		}
+		dbPath = testDBPath
 	}
 
-	db, err := sql.Open(database.SQLITE3, cfg.DB.SQLiteFilePath)
+	db, err := sql.Open(database.SQLITE3, dbPath)
 	if err != nil {
 		return err
 	}

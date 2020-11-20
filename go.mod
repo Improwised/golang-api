@@ -4,10 +4,12 @@ go 1.15
 
 require (
 	github.com/andybalholm/brotli v1.0.1 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/doug-martin/goqu/v9 v9.10.0
 	github.com/getsentry/sentry-go v0.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofiber/fiber/v2 v2.1.4
+	github.com/gofiber/jwt v0.2.0
 	github.com/golang-migrate/migrate/v4 v4.13.0 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -18,5 +20,6 @@ require (
 	github.com/rubenv/sql-migrate v0.0.0-20200616145509-8d140a17f351
 	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/testify v1.5.1
+	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/sys v0.0.0-20201106081118-db71ae66460a // indirect
 )
