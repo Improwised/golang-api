@@ -1,18 +1,5 @@
 version: "3.7"
 services:
-  db:
-    container_name: golang-api-db
-    image: mysql:8.0.22
-    ports:
-      - 3306:3306
-    volumes:
-      - ./database/mysql-volume:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: golang-api
-      MYSQL_USER: golang-api
-      MYSQL_PASSWORD: golang-api
-
   adminer:
     image: adminer
     restart: always
