@@ -1,8 +1,23 @@
 {
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "https"
+  ],
   "swagger": "2.0",
+  "info": {
+    "title": "Golang API.",
+    "version": "0.0.1-alpha"
+  },
+  "host": "localhost",
+  "basePath": "/api/v1",
   "paths": {
-    "/users": {
-      "get": {
+    "/login": {
+      "post": {
         "consumes": [
           "application/json"
         ],
@@ -10,20 +25,41 @@
           "http",
           "https"
         ],
-        "summary": "For retrieve users.",
-        "operationId": "USERS",
+        "tags": [
+          "AUTH"
+        ],
+        "summary": "For login user.",
+        "operationId": "doAuthRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "x-go-name": "Email"
+                },
+                "password": {
+                  "type": "string",
+                  "x-go-name": "Password"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "$ref": "#/responses/getUsersResponse"
-          },
-          "404": {
-            "$ref": "#/responses/genericError"
+            "$ref": "#/responses/userGetResponse"
           },
           "500": {
             "$ref": "#/responses/genericError"
           }
         }
-      },
+      }
+    },
+    "/users": {
       "post": {
         "consumes": [
           "application/json"
@@ -36,13 +72,21 @@
           "USERS"
         ],
         "summary": "For create new user.",
-        "operationId": "createUserRequest",
+        "operationId": "userCreateRequest",
         "parameters": [
           {
-            "name": "Body",
+            "x-go-name": "User",
+            "name": "user",
             "in": "body",
             "schema": {
               "type": "object",
+              "required": [
+                "first_name",
+                "last_name",
+                "email",
+                "password",
+                "roles"
+              ],
               "properties": {
                 "email": {
                   "type": "string",
@@ -55,6 +99,14 @@
                 "last_name": {
                   "type": "string",
                   "x-go-name": "LastName"
+                },
+                "password": {
+                  "type": "string",
+                  "x-go-name": "Password"
+                },
+                "roles": {
+                  "type": "string",
+                  "x-go-name": "Roles"
                 }
               }
             }
@@ -62,7 +114,40 @@
         ],
         "responses": {
           "201": {
-            "$ref": "#/responses/createUserResponse"
+            "$ref": "#/responses/userCreateResponse"
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      }
+    },
+    "/users/user_id": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "USERS"
+        ],
+        "summary": "For retrieve users.",
+        "operationId": "userGetRequest",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "name": "user_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userGetResponse"
           },
           "500": {
             "$ref": "#/responses/genericError"
@@ -95,6 +180,14 @@
         "last_name": {
           "type": "string",
           "x-go-name": "LastName"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "roles": {
+          "type": "string",
+          "x-go-name": "Roles"
         },
         "updated_at": {
           "type": "string",
@@ -183,6 +276,60 @@
             "$ref": "#/definitions/User"
           }
         }
+      }
+    },
+    "userCreateResponse": {
+      "description": "UserCreateResponseWrapper for Create user response",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "x-go-name": "Email"
+          },
+          "first_name": {
+            "type": "string",
+            "x-go-name": "FirstName"
+          },
+          "id": {
+            "type": "string",
+            "x-go-name": "ID"
+          },
+          "last_name": {
+            "type": "string",
+            "x-go-name": "LastName"
+          }
+        }
+      },
+      "headers": {
+        "user": {}
+      }
+    },
+    "userGetResponse": {
+      "description": "UserGetResponseWrapper for get user response",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "x-go-name": "Email"
+          },
+          "first_name": {
+            "type": "string",
+            "x-go-name": "FirstName"
+          },
+          "id": {
+            "type": "string",
+            "x-go-name": "ID"
+          },
+          "last_name": {
+            "type": "string",
+            "x-go-name": "LastName"
+          }
+        }
+      },
+      "headers": {
+        "user": {}
       }
     }
   }
