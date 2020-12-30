@@ -1,3 +1,4 @@
+.PHONY: create-migrate build test
 create-migrate:
 	migrate create -ext sql -dir database/migrations $(file_name)
 
