@@ -1,6 +1,6 @@
 kind: pipeline
 type: docker
-name: default
+name: golangapi
 
 steps:
 - name: build
@@ -8,6 +8,12 @@ steps:
   commands:
   - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
   - go build app.go
+  
+- name: push
+  image: docker
+  commands:
+  - docker build -t golang-api-$(git rev-parse --short HEAD) .
+  
 
 trigger:
   event:
