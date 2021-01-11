@@ -1,0 +1,26 @@
+kind: pipeline
+type: docker
+name: go-lang-api-build-and-push
+
+environment:
+  GOOS: linux
+  GOARCH: amd64
+
+steps:
+- name: test & build
+  image: golang
+  commands:
+  - mv .env.example .env # Development only
+  - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
+  - go build app.go
+
+- name: Push to Container Registry
+  commands:
+  - docker build -t golang-api .
+
+trigger:
+  event:
+  - push
+  branch:
+  - docker
+
