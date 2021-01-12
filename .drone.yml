@@ -3,17 +3,25 @@ type: docker
 name: golangapi
 
 steps:
-- name: build
+- name: test
   image: golang
   commands:
   - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
-  - go build app.go
-
-- name: push
-  image: docker
-  commands:
-  - docker build -t golang-api-${DRONE_COMMIT_SHA:0:7} .
   
+- name: build
+  image: golang
+  commands:
+  - go build app.go
+  - echo -n "docker-"${DRONE_COMMIT_SHA:0:7}
+
+- name: docker
+  image: plugins/docker
+  settings:
+    username: 
+      from_secret: DOCKER_USERNAME
+    password:
+      from_password: DOCKER_PASSWORD
+    repo: bhautikimp/golangapi
 
 trigger:
   event:
