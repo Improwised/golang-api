@@ -13,16 +13,18 @@ steps:
       from_secret: slack_webhook
   template: build {{repo.name}} / {{build.branch}} - {{build.number}} has started for CI!
   when:
-    branch:
-    - /*
+    ref:
+      include:
+      - refs/heads/**
 
 - name: test
   image: golang
   commands:
   - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
   when:
-    branch:
-    - /*
+    ref:
+      include:
+      - refs/heads/**
 
 - name: docker
   image: plugins/docker
