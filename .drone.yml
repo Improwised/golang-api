@@ -17,6 +17,14 @@ steps:
     webhook:
       from_secret: slack_webhook
     channel: onboarding
+  template: >
+      {{#success build.status}}
+        build {{build.number}} succeeded. Good job.
+      {{else}}
+        build {{build.number}} failed.
+      {{/success}}
+  when:
+    status: [success, fail]
 
 trigger:
   event:
@@ -56,7 +64,7 @@ steps:
   settings:
     webhook:
       from_secret: slack_webhook
-    channel: onboarding
+  channel: onboarding
 
 trigger:
   event:
