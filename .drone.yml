@@ -3,7 +3,7 @@
 
 kind: pipeline
 type: docker
-name: golangapi
+name: golangapiDevelopment
 
 steps:
 - name: test
@@ -31,7 +31,7 @@ trigger:
 # This pipeline test, build, and push image to docker registry.
 kind: pipeline
 type: docker
-name: golangapi
+name: golangapiProduction
 
 steps:
 - name: test
