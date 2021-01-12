@@ -6,47 +6,23 @@ type: docker
 name: golangapiDevelopment
 
 steps:
-- name: test
-  image: golang
-  commands:
-  - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
-
-- name: slack
+- name: preSlackNotitification
   image: plugins/slack
   settings:
     webhook:
       from_secret: slack_webhook
-    channel: onboarding
-  template: >
-      {{#success build.status}}
-        build {{build.number}} succeeded. Good job.
-      {{else}}
-        build {{build.number}} failed.
-      {{/success}}
+  template: build {{repo.name}} / {{build.branch}} - {{build.number}} has started for CI!
   when:
-    status: [success, fail]
+    branch:
+    - *
 
-trigger:
-  event:
-  - push
-  branch:
-  - docker
-
-
----
-
-# This pipeline executed when push to master
-# This pipeline test, build, and push image to docker registry.
-kind: pipeline
-type: docker
-name: golangapiProduction
-
-steps:
 - name: test
   image: golang
   commands:
   - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
-  - echo -n "master-"${DRONE_COMMIT_SHA:0:7} > .tags
+  when:
+    branch:
+    - *
 
 - name: docker
   image: plugins/docker
@@ -58,16 +34,22 @@ steps:
     repo: bhautikimp/golangapi
     build_args:
       - MODE=docker
+  when:
+    branch:
+    - master
+    - develop
 
 - name: slack
   image: plugins/slack
   settings:
     webhook:
       from_secret: slack_webhook
-  channel: onboarding
+  template: >
+      {{#success build.status}}
+        build {{repo.name}} / {{build.branch}} - {{build.number}} successed!
+      {{else}}
+        build {{repo.name}} / {{build.branch}} - {{build.number}} failed!
+      {{/success}}
+  when:
+    status: [success, fail]
 
-trigger:
-  event:
-  - push
-  branch:
-  - master
