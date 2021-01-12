@@ -1,3 +1,6 @@
+# This pipeline executed when any changes push to docker
+# This pipeline test the go.
+
 kind: pipeline
 type: docker
 name: golangapi
@@ -7,9 +10,36 @@ steps:
   image: golang
   commands:
   - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
-  - go build app.go
-  - echo -n "docker-"${DRONE_COMMIT_SHA:0:7} > .tags
-  
+
+- name: slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: slack_webhook
+    channel: onboarding
+
+trigger:
+  event:
+  - push
+  branch:
+  - docker
+
+
+---
+
+# This pipeline executed when push to master
+# This pipeline test, build, and push image to docker registry.
+kind: pipeline
+type: docker
+name: golangapi
+
+steps:
+- name: test
+  image: golang
+  commands:
+  - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
+  - echo -n "master-"${DRONE_COMMIT_SHA:0:7} > .tags
+
 - name: docker
   image: plugins/docker
   settings:
@@ -18,10 +48,18 @@ steps:
     password:
       from_secret: docker_password
     repo: bhautikimp/golangapi
+    build_args:
+      - MODE=docker
+
+- name: slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: slack_webhook
+    channel: onboarding
 
 trigger:
   event:
   - push
   branch:
-  - docker
-
+  - master

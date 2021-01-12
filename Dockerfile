@@ -12,8 +12,10 @@ RUN apk add --no-cache build-base \
 
 COPY . .
 
-# If mod arg is equal to dev then rename .env.example to .env else .ev.testing to .env
-RUN if [[ ${MODE} == "dev" ]]; then mv .env.example .env ; else mv .env.testing .env ; fi 
+# If mod arg is equal to DEV then rename .env.example to .env
+RUN if [[ ${MODE} == "dev" ]]; then mv .env.example .env ; fi 
+# If mod arg is equal to DOCKER then rename .env.docker to .env else .ev.testing to .env
+RUN if [[ ${MODE} == "docker" ]]; then mv .env.docker .env ; else mv .env.testing .env ; fi 
 
 RUN go build -o app
 
@@ -25,6 +27,7 @@ WORKDIR /app
 # Here copy our builded app from /go/src/app to /app/
 COPY --from=build /go/src/app/app /app/
 # Copy ENV
+# We can also specify at runtime by -e flag.
 COPY --from=build /go/src/app/.env /app/
 
 EXPOSE 3000
