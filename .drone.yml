@@ -14,7 +14,7 @@ steps:
   template: build {{repo.name}} / {{build.branch}} - {{build.number}} has started for CI!
   when:
     branch:
-      include: *
+    - /*
 
 - name: test
   image: golang
@@ -22,7 +22,7 @@ steps:
   - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
   when:
     branch:
-      include: *
+    - /*
 
 - name: docker
   image: plugins/docker
