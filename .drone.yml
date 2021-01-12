@@ -7,20 +7,16 @@ steps:
   image: golang
   commands:
   - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
-  
-- name: build
-  image: golang
-  commands:
   - go build app.go
-  - echo -n "docker-"${DRONE_COMMIT_SHA:0:7}
-
+  - echo -n "docker-"${DRONE_COMMIT_SHA:0:7} > .tags
+  
 - name: docker
   image: plugins/docker
   settings:
     username: 
       from_secret: DOCKER_USERNAME
     password:
-      from_password: DOCKER_PASSWORD
+      from_secret: DOCKER_PASSWORD
     repo: bhautikimp/golangapi
 
 trigger:
