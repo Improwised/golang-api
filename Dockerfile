@@ -27,4 +27,7 @@ COPY --from=build /go/src/app/app /app/
 # Copy ENV
 COPY --from=build /go/src/app/.env /app/
 
+EXPOSE 3000
+
 ENTRYPOINT ["./app"]
+

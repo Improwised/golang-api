@@ -8,11 +8,11 @@ steps:
   commands:
   - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
   - go build app.go
-  
+
 - name: push
   image: docker
   commands:
-  - docker build -t golang-api-$(git rev-parse --short HEAD) .
+  - docker build -t golang-api-${DRONE_COMMIT_SHA:0:7} .
   
 
 trigger:
