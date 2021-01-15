@@ -11,7 +11,7 @@ steps:
   settings:
     webhook:
       from_secret: slack_webhook
-  template: build {{repo.name}} / {{build.branch}} - {{build.number}} has started for CI!
+    template: build {{repo.name}} / {{build.branch}} - {{build.number}} CI started!
   when:
     ref:
       include:
@@ -46,12 +46,12 @@ steps:
   settings:
     webhook:
       from_secret: slack_webhook
-  template: >
-      {{#success build.status}}
-        build {{repo.name}} / {{build.branch}} - {{build.number}} successed!
-      {{else}}
-        build {{repo.name}} / {{build.branch}} - {{build.number}} failed!
-      {{/success}}
+    template: >
+        {{#success build.status}}
+          build {{repo.name}} / {{build.branch}} - {{build.number}} successed!
+        {{else}}
+          build {{repo.name}} / {{build.branch}} - {{build.number}} failed!
+        {{/success}}
   when:
     status: [success, fail]
 
