@@ -41,7 +41,7 @@ func NewUserController(goqu *goqu.Database) (*UserController, error) {
 //       200: userGetResponse
 //		 500: genericError
 func (ctrl *UserController) UserGet(c *fiber.Ctx) error {
-
+	defer c.Next()
 	userID := c.Params("user_id")
 	user := &models.User{
 		ID: userID,
@@ -88,7 +88,7 @@ type UserGetResponseWrapper struct {
 //       201: userCreateResponse
 //       500: genericError
 func (ctrl *UserController) UserCreate(c *fiber.Ctx) error {
-
+	defer c.Next()
 	var user models.User
 
 	err := json.Unmarshal(c.Body(), &user)

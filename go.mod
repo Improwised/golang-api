@@ -17,11 +17,13 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.3.0
 	github.com/mattn/go-sqlite3 v1.14.4
+	github.com/prometheus/client_golang v1.3.0
 	github.com/rs/xid v1.2.1
 	github.com/rubenv/sql-migrate v0.0.0-20200616145509-8d140a17f351
 	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.6.1
+	github.com/valyala/fasthttp v1.17.0
 	go.uber.org/zap v1.13.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect

@@ -2,14 +2,15 @@ package v1
 
 import (
 	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/models"
 	"github.com/Improwised/golang-api/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v2"
-	"net/http"
-	"time"
 )
 
 type AuthController struct {
@@ -40,6 +41,7 @@ func NewAuthController(goqu *goqu.Database) (*AuthController, error) {
 //       200: userGetResponse
 //		 500: genericError
 func (ctrl *AuthController) DoAuth(c *fiber.Ctx) error {
+	defer c.Next()
 	var secret = config.GetConfigByName("JWT_SECRET")
 
 	var user models.User

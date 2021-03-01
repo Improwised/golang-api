@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"github.com/Improwised/golang-api/middleware"
 	"sync"
+
+	"github.com/Improwised/golang-api/middleware"
 
 	controller "github.com/Improwised/golang-api/controllers/api/v1"
 	"github.com/doug-martin/goqu/v9"
@@ -14,7 +15,7 @@ var mu sync.Mutex
 // Setup func
 func Setup(app *fiber.App, goqu *goqu.Database) error {
 	mu.Lock()
-
+	app.Get("/metrics", middleware.PrometheusHandler)
 	app.Static("/assets/", "./assets")
 	app.Get("/docs", func(c *fiber.Ctx) error {
 		return c.Render("./assets/index.html", fiber.Map{})
