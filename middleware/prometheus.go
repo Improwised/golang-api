@@ -20,6 +20,11 @@ var (
 		),
 	)
 
+	cpuTemp = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "cpu_temperature_celsius",
+		Help: "Current temperature of the CPU.",
+	})
+
 	errCnt = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "promhttp_metric_handler_errors_total",
@@ -30,10 +35,12 @@ var (
 )
 
 func init() {
+	prometheus.MustRegister(cpuTemp)
 	prometheus.MustRegister(errCnt)
 }
 
 func PrometheusHandler(c *fiber.Ctx) error {
+	Prometheus(c)
 	p(c.Context())
 	return nil
 }
