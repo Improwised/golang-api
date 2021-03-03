@@ -3,31 +3,64 @@
 
 kind: pipeline
 type: docker
-name: golangapiDevelopment
+name: go-lang-api
+trigger:
+  event:
+    include:
+      - push
+    exclude:
+      - tag
+      - pull_request
 
 steps:
-- name: preSlackNotitification
-  image: plugins/slack
+# Pre slack notification
+- name: pre-slack-notitification
+  pull: if-not-exists
+  image: plugins/slack:linux-amd64
   settings:
     webhook:
       from_secret: slack_webhook
-    template: build {{repo.name}} / {{build.branch}} - {{build.number}} CI started!
+    template: >
+      *🏁 CI Begin for Build {{build.number}}*
+      
+      *Project: * {{ repo.name }}
+      
+      *Commit Message:* ${DRONE_COMMIT_MESSAGE:0:122}
+      
+      *Commit ID:* <https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>
+      
+      *Branch:* <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ build.branch }}>
+      
+      *Author:* {{ build.author }}
+      
+      <{{ build.link }}|Visit build page ↗>
   when:
-    ref:
-      include:
-      - refs/heads/**
+    event:
+        include:
+        - push
+        exclude:
+        - tag
+        - pull_request
 
+# Test application
 - name: test
-  image: golang
+  pull: if-not-exists
+  image: golang:1.14
   commands:
-  - go test -coverprofile coverage.out ./... && go tool cover -func coverage.out
+  - go test -v -coverprofile coverage.out ./...
+  - echo $?
   when:
-    ref:
+    event:
       include:
-      - refs/heads/**
+        - push
+      exclude:
+        - tag
+        - pull_request
 
+# Push docker image
 - name: docker
-  image: plugins/docker
+  pull: if-not-exists
+  image: plugins/docker:19.03
   settings:
     username: 
       from_secret: docker_username
@@ -36,22 +69,40 @@ steps:
     repo: bhautikimp/golangapi
     build_args:
       - MODE=docker
-  when:
-    branch:
-    - master
-    - develop
+    when:
+      event:
+        include:
+        - push
+        exclude:
+        - tag
+        - pull_request
 
-- name: slack
-  image: plugins/slack
+- name: post-slack-notification
+  pull: if-not-exists
+  image: plugins/slack:linux-amd64
   settings:
     webhook:
       from_secret: slack_webhook
     template: >
-        {{#success build.status}}
-          build {{repo.name}} / {{build.branch}} - {{build.number}} successed!
-        {{else}}
-          build {{repo.name}} / {{build.branch}} - {{build.number}} failed!
-        {{/success}}
+      *{{#success build.status}}🎉{{ else }}✘{{/success}} {{ uppercasefirst build.status }}: Build #{{ build.number }}* (type: `{{ build.event }}`)
+      
+      *Project: * {{ repo.name }}
+      
+      *Commit Message:* ${DRONE_COMMIT_MESSAGE:0:122}
+      
+      *Commit ID:* <https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>
+      
+      *Branch:* <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ build.branch }}>
+      
+      *Author:* {{ build.author }}
+      
+      <{{ build.link }}|Visit build page ↗>
+  
   when:
-    status: [success, fail]
-
+    status: [success, failure]
+    event:
+      include:
+        - push
+      exclude:
+        - tag
+        - pull_request
