@@ -15,7 +15,6 @@ var mu sync.Mutex
 // Setup func
 func Setup(app *fiber.App, goqu *goqu.Database) error {
 	mu.Lock()
-	app.Get("/metrics", middleware.PrometheusHandler)
 	app.Static("/assets/", "./assets")
 	app.Get("/docs", func(c *fiber.Ctx) error {
 		return c.Render("./assets/index.html", fiber.Map{})
@@ -33,7 +32,6 @@ func Setup(app *fiber.App, goqu *goqu.Database) error {
 	if err != nil {
 		return err
 	}
-
 	mu.Unlock()
 	return nil
 }

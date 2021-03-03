@@ -1,9 +1,10 @@
 package cli
 
 import (
+	"log"
+
 	"github.com/Improwised/golang-api/middleware"
 	"go.uber.org/zap"
-	"log"
 
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
@@ -21,6 +22,8 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Create fiber app
 			app := fiber.New(fiber.Config{})
+
+			app.Get("/metrics", middleware.PrometheusHandler)
 
 			// Middleware
 			app.Use(middleware.Handler(logger))
