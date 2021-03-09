@@ -38,3 +38,10 @@ nbproject
 .tmp
 .env
 .vscode
+
+# Binary to ignore
+migrate
+swagger
+
+# coverage file
+coverage.out
