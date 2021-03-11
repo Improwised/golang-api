@@ -15,26 +15,25 @@
 package main
 
 import (
+	"time"
+
 	"github.com/Improwised/golang-api/cli"
 	"github.com/Improwised/golang-api/config"
+	"github.com/Improwised/golang-api/logger"
 	"github.com/Improwised/golang-api/routinewrapper"
 	"github.com/getsentry/sentry-go"
 	"go.uber.org/zap"
-	"time"
 )
 
 func main() {
 	// Collecting config from env or file or flag
 	cfg := config.GetConfig()
 
-	var logger *zap.Logger
-	var err error
-
-	if config.GetConfigByName("IS_DEVELOPMENT") == "true" {
-		logger, err = zap.NewDevelopment(zap.AddStacktrace(zap.ErrorLevel), zap.AddCaller())
-	} else {
-		logger, err = zap.NewProduction(zap.AddStacktrace(zap.ErrorLevel), zap.AddCaller())
+	logger, err := logger.NewRootLogger(cfg.Debug, cfg.IsDevelopment)
+	if err != nil {
+		panic(err)
 	}
+	zap.ReplaceGlobals(logger)
 
 	// this function will logged error log in sentry
 	sentryLoggedFunc := func() {

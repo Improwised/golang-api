@@ -51,23 +51,24 @@
 
 for ex: `start` commands run `go run app.go api` if your app.go is somewhere else then you need to update this file for paths to work properly.
 
+- **make start-dev** : This will start your app with `nodemon` which watch for changes in your directory and reload go.
+
 - **make start** : To start api, it basically runs `go run app.go`
 
-- **make create_migration file_name=migration_name** : This command will create migration `up` and `down` both respectively, you need to pass `file_name={migration_name}`
+- **make create-migration file_name=migration_name** : This command will create migration `up` and `down` both respectively, you need to pass `file_name={migration_name}`
 
 - **make build**  : It will build binary of your project.
 
 - **make test** : To run testcase for entire project, `.env.testing` env need to use while writing testcase, you need to load 
 
-- **make swagger_genrate** : To genrate swagger docs, This command will download binary if not exist.
+- **make swagger-genrate** : To genrate swagger docs, This command will download binary if not exist.
 
-- **make start** : To start api without building binary.
-- **make migration_up** : To run `Up` migrations.
-- **make migration_down** : To run `Down` migrations, Which technically revert migration that are being perform by `Up`.
+- **make migration-up** : To run `Up` migrations.
+- **make migration-down** : To run `Down` migrations, Which technically revert migration that are being perform by `Up`.
 ---
 ### **Migrations**
 - **CREATE :** To create migrations i have discribed details in [Kick Start Commands](#kick-start-commands) section.
-- **RUN :** To run migration there is two command `make migration_up` && `make migration_down`.
+- **RUN :** To run migration there is two command `make migration-up` && `make migration-down`.
 - Migration needs `-- +migrate Up` and `-- +migrate Down` respectively in starting of files, this is required because we are using [sql-migrate](https://github.com/rubenv/sql-migrate) package 
 ### **Code Walk-through**
 - #### Config:
