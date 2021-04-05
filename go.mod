@@ -9,7 +9,7 @@ require (
 	github.com/getsentry/sentry-go v0.9.0
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/gofiber/fiber/v2 v2.1.4
+	github.com/gofiber/fiber/v2 v2.7.1
 	github.com/gofiber/jwt/v2 v2.1.0
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -26,6 +26,5 @@ require (
 	go.uber.org/zap v1.13.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
-	golang.org/x/sys v0.0.0-20201106081118-db71ae66460a // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
