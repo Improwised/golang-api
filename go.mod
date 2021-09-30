@@ -21,8 +21,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	go.uber.org/zap v1.13.0
+	go.uber.org/zap v1.19.1
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
