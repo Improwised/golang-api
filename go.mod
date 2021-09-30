@@ -7,7 +7,7 @@ require (
 	github.com/doug-martin/goqu/v9 v9.10.0
 	github.com/getsentry/sentry-go v0.9.0
 	github.com/go-playground/universal-translator v0.17.0 // indirect
-	github.com/go-sql-driver/mysql v1.5.0
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gofiber/fiber/v2 v2.19.0
 	github.com/gofiber/jwt/v2 v2.2.7
 	github.com/joho/godotenv v1.3.0
