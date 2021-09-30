@@ -64,6 +64,10 @@ labels:
     color: '#0366d6'
     description: Pull requests that update a dependency file
 
+  - name: merge
+    color: '#506EC3'
+    description: Merge the PR
+
 # Collaborators: give specific users access to this repository.
 # See https://docs.github.com/en/rest/reference/repos#add-a-repository-collaborator for available options
 collaborators:
