@@ -16,6 +16,7 @@ var AllConfig AppConfig
 // AppConfig type AppConfig
 type AppConfig struct {
 	IsDevelopment bool   `envconfig:"IS_DEVELOPMENT"`
+	Debug         bool   `envconfig:"DEBUG"`
 	Env           string `envconfig:"APP_ENV"`
 	Port          string `envconfig:"APP_PORT"`
 	DB            DBConfig
