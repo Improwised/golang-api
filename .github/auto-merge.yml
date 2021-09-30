@@ -26,4 +26,3 @@ mergeMethod: rebase
 
 requiredLabels:
 - merge
-- dependencies
