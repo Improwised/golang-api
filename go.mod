@@ -18,7 +18,7 @@ require (
 	github.com/rs/xid v1.2.1
 	github.com/rubenv/sql-migrate v0.0.0-20200616145509-8d140a17f351
 	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/cobra v1.1.1
+	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.19.1
