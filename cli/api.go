@@ -1,9 +1,14 @@
 package cli
 
 import (
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/Improwised/golang-api/middleware"
 	"go.uber.org/zap"
-	"log"
 
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
@@ -36,9 +41,24 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 				return err
 			}
 
+			// Call when SIGINT or SIGTERM received
+			c := make(chan os.Signal, 1)
+			signal.Notify(c, os.Interrupt, os.Kill)
+			go func() {
+				_ = <-c
+				fmt.Println("Gracefully shutting down...")
+				app.Shutdown() /// Stop to accept new connections
+			}()
+
 			// Listen on port 3000
-			log.Fatal(app.Listen(cfg.Port))
+			if err := app.Listen(cfg.Port); err != nil {
+				log.Panic(err)
+			}
+
+			time.Sleep(time.Second * 10) // Exit after 10s
+
 			return nil
+
 		},
 	}
 

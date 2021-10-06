@@ -1,4 +1,5 @@
 # Golang BoilerPlater
+
 ### **Index**
 - [Introduction](#introduction)
 
@@ -66,10 +67,25 @@ for ex: `start` commands run `go run app.go api` if your app.go is somewhere els
 - **make migration-up** : To run `Up` migrations.
 - **make migration-down** : To run `Down` migrations, Which technically revert migration that are being perform by `Up`.
 ---
+## Migration
+
+Migrations are like **version control for your database**, allowing your team to define and share the application's database schema definition. If you have ever had to tell a teammate to manually add a column to their local database schema after pulling in your changes from source control, you've faced the problem that database migrations solve.
+
+
+## Execution
+
+1. Run ```docker-compose up``` to spin up database and admire.
+2. Open ```localhost:8080```,  select **system** to ```PostgreSQL``` and put username and password.
+3. Build image using ```docker build -t golang-api .```
+4. Run ```docker run golang-api``` to run the container.
+
 ### **Migrations**
 - **CREATE :** To create migrations i have discribed details in [Kick Start Commands](#kick-start-commands) section.
 - **RUN :** To run migration there is two command `make migration-up` && `make migration-down`.
 - Migration needs `-- +migrate Up` and `-- +migrate Down` respectively in starting of files, this is required because we are using [sql-migrate](https://github.com/rubenv/sql-migrate) package 
+
+
+
 ### **Code Walk-through**
 - #### Config:
     - We are using [envconfig](https://github.com/kelseyhightower/envconfig) which binds env values to struct elements.
