@@ -38,6 +38,7 @@ nbproject
 .tmp
 .env
 .vscode
+app
 
 # Binary to ignore
 migrate

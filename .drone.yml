@@ -1,0 +1,108 @@
+# # This pipeline executed when any changes push to docker
+# # This pipeline test the go.
+
+# kind: pipeline
+# type: docker
+# name: go-lang-api
+# trigger:
+#   event:
+#     include:
+#       - push
+#     exclude:
+#       - tag
+#       - pull_request
+
+# steps:
+# # Pre slack notification
+# - name: pre-slack-notitification
+#   pull: if-not-exists
+#   image: plugins/slack:linux-amd64
+#   settings:
+#     webhook:
+#       from_secret: slack_webhook
+#     template: >
+#       *🏁 CI Begin for Build {{build.number}}*
+      
+#       *Project: * {{ repo.name }}
+      
+#       *Commit Message:* ${DRONE_COMMIT_MESSAGE:0:122}
+      
+#       *Commit ID:* <https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>
+      
+#       *Branch:* <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ build.branch }}>
+      
+#       *Author:* {{ build.author }}
+      
+#       <{{ build.link }}|Visit build page ↗>
+#   when:
+#     event:
+#         include:
+#         - push
+#         exclude:
+#         - tag
+#         - pull_request
+
+# # Test application
+# - name: test
+#   pull: if-not-exists
+#   image: golang:1.14
+#   commands:
+#   - go test -v -coverprofile coverage.out ./...
+#   - echo $?
+#   when:
+#     event:
+#       include:
+#         - push
+#       exclude:
+#         - tag
+#         - pull_request
+
+# # Push docker image
+# - name: docker
+#   pull: if-not-exists
+#   image: plugins/docker:19.03
+#   settings:
+#     username: 
+#       from_secret: docker_username
+#     password:
+#       from_secret: docker_password
+#     repo: bhautikimp/golangapi
+#     build_args:
+#       - MODE=docker
+#     when:
+#       event:
+#         include:
+#         - push
+#         exclude:
+#         - tag
+#         - pull_request
+
+# - name: post-slack-notification
+#   pull: if-not-exists
+#   image: plugins/slack:linux-amd64
+#   settings:
+#     webhook:
+#       from_secret: slack_webhook
+#     template: >
+#       *{{#success build.status}}🎉{{ else }}✘{{/success}} {{ uppercasefirst build.status }}: Build #{{ build.number }}* (type: `{{ build.event }}`)
+      
+#       *Project: * {{ repo.name }}
+      
+#       *Commit Message:* ${DRONE_COMMIT_MESSAGE:0:122}
+      
+#       *Commit ID:* <https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>
+      
+#       *Branch:* <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ build.branch }}>
+      
+#       *Author:* {{ build.author }}
+      
+#       <{{ build.link }}|Visit build page ↗>
+  
+#   when:
+#     status: [success, failure]
+#     event:
+#       include:
+#         - push
+#       exclude:
+#         - tag
+#         - pull_request
