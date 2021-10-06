@@ -10,7 +10,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gofiber/fiber/v2 v2.19.0
 	github.com/gofiber/jwt/v2 v2.2.7
-	github.com/joho/godotenv v1.3.0
+	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.10.3
