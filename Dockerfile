@@ -1,36 +1,32 @@
-FROM golang:1.15.6-alpine3.12 AS build
+FROM golang:1.17.2-alpine AS build
+
+RUN apk add --no-cache build-base wget curl \
+&& curl -sfL $(curl -s https://api.github.com/repos/powerman/dockerize/releases/latest | grep -i /dockerize-$(uname -s)-$(uname -m)\" | cut -d\" -f4) | install /dev/stdin /usr/local/bin/dockerize
 
 WORKDIR /go/src/app
 
-# ARGS does not work outside IMAGE
-ARG MODE="dev" 
+COPY go.mod go.sum .
 
-RUN apk add --no-cache build-base \ 
-&& apk add --no-cache wget \ 
-&& apk add  --no-cache curl \
-&& curl -sfL $(curl -s https://api.github.com/repos/powerman/dockerize/releases/latest | grep -i /dockerize-$(uname -s)-$(uname -m)\" | cut -d\" -f4) | install /dev/stdin /usr/local/bin/dockerize
+RUN go mod download
 
 COPY . .
 
-# If mod arg is equal to DEV then rename .env.example to .env
-RUN if [[ ${MODE} == "dev" ]]; then mv .env.example .env ; fi 
-# If mod arg is equal to DOCKER then rename .env.docker to .env else .ev.testing to .env
-RUN if [[ ${MODE} == "docker" ]]; then mv .env.docker .env ; else mv .env.testing .env ; fi 
+ARG MODE="dev"
 
-RUN go build -o app
+RUN set -ex; \
+  if [[ ${MODE} == "dev" ]]; then mv .env.example .env; \
+  elif [[ ${MODE} == "docker" ]]; then mv .env.docker .env ; \
+  else mv .env.testing .env; fi; \
+  mkdir /app; \
+  cp .env /app/.env
 
-# Use alpine image
-FROM alpine 
+RUN go build -o /app/app
 
+FROM alpine
 WORKDIR /app
 
-# Here copy our builded app from /go/src/app to /app/
-COPY --from=build /go/src/app/app /app/
-# Copy ENV
-# We can also specify at runtime by -e flag.
-COPY --from=build /go/src/app/.env /app/
+COPY --from=build /usr/local/bin/dockerize /usr/local/bin/dockerize
+COPY --from=build /app/ ./
 
 EXPOSE 3000
-
-ENTRYPOINT ["./app"]
-
+ENTRYPOINT ["/app/app"]
