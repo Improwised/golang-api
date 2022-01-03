@@ -8,7 +8,7 @@ require (
 	github.com/getsentry/sentry-go v0.9.0
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/gofiber/fiber/v2 v2.19.0
+	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/gofiber/jwt/v2 v2.2.7
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
