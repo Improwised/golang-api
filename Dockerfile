@@ -1,36 +1,43 @@
-FROM golang:1.15.6-alpine3.12 AS build
+# syntax = docker/dockerfile:latest
+FROM golang:1.19.1-alpine3.16 AS build
 
-WORKDIR /go/src/app
+ARG GOPATH="/go"
+ARG GOMODCACHE=${GOPATH}/pkg/mod
+ARG GOCACHE="/root/.cache/go-build"
+ARG MODE="dev"
 
-# ARGS does not work outside IMAGE
-ARG MODE="dev" 
+ENV GOMODCACHE=${GOMODCACHE}
+ENV GOCACHE=${GOCACHE}
 
-RUN apk add --no-cache build-base \ 
-&& apk add --no-cache wget \ 
-&& apk add  --no-cache curl \
-&& curl -sfL $(curl -s https://api.github.com/repos/powerman/dockerize/releases/latest | grep -i /dockerize-$(uname -s)-$(uname -m)\" | cut -d\" -f4) | install /dev/stdin /usr/local/bin/dockerize
+RUN set -ex; \
+    apk update && \
+    apk add --no-cache build-base wget curl;
 
-COPY . .
+COPY go.* ./
 
-# If mod arg is equal to DEV then rename .env.example to .env
-RUN if [[ ${MODE} == "dev" ]]; then mv .env.example .env ; fi 
-# If mod arg is equal to DOCKER then rename .env.docker to .env else .ev.testing to .env
-RUN if [[ ${MODE} == "docker" ]]; then mv .env.docker .env ; else mv .env.testing .env ; fi 
+RUN --mount=type=cache,mode=0777,target=${GOCACHE} \
+    --mount=type=cache,mode=0777,target=${GOMODCACHE} \
+    go mod download
 
-RUN go build -o app
+COPY . ./
 
-# Use alpine image
+RUN --mount=type=cache,mode=0777,target=${GOCACHE} \
+    --mount=type=cache,mode=0777,target=${GOMODCACHE} \
+    set -ex; \
+    if [[ ${MODE} == "dev" ]]; then mv .env.example .env; \
+    elif [[ ${MODE} == "docker" ]]; then mv .env.docker .env ; \
+    else mv .env.testing .env; fi; \
+    mkdir /app; \
+    cp -r assets /app/assets; \
+    cp -r config /app/config; \
+    cp -r database /app/database; \
+    cp .env /app/.env; \
+    go build -o /tmp/app; \
+    cp -r /tmp/app /app/;
+
 FROM alpine 
-
 WORKDIR /app
 
-# Here copy our builded app from /go/src/app to /app/
-COPY --from=build /go/src/app/app /app/
-# Copy ENV
-# We can also specify at runtime by -e flag.
-COPY --from=build /go/src/app/.env /app/
-
-EXPOSE 3000
+COPY --from=build /tmp/app /app/ ./
 
 ENTRYPOINT ["./app"]
-

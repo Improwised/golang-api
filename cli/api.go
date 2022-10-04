@@ -1,10 +1,10 @@
 package cli
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Improwised/golang-api/middleware"
@@ -43,19 +43,21 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 
 			// Call when SIGINT or SIGTERM received
 			c := make(chan os.Signal, 1)
-			signal.Notify(c, os.Interrupt, os.Kill)
+			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 			go func() {
-				_ = <-c
-				fmt.Println("Gracefully shutting down...")
-				app.Shutdown() /// Stop to accept new connections
+				<-c
+				logger.Info("Gracefully shutting down...")
+				if err := app.Shutdown(); err != nil {
+					logger.Panic("Error while shutdown server", zap.Error(err))
+				}
 			}()
 
-			// Listen on port 3000
 			if err := app.Listen(cfg.Port); err != nil {
 				log.Panic(err)
 			}
 
-			time.Sleep(time.Second * 10) // Exit after 10s
+			logger.Info("Server stopped to receive new requests or connection, and closing in 10 seconds...")
+			time.Sleep(time.Second * 10)
 
 			return nil
 

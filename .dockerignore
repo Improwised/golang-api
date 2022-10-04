@@ -9,3 +9,5 @@ README.md
 arm/
 powerpc/
 mips/
+vendor/
+.env
