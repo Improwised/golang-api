@@ -34,11 +34,11 @@ ENV DOCKERIZE_VERSION=v0.6.1
 RUN set -ex; \
     apk update && \
     apk add --no-cache wget build-base && \
-    wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz \
-    && rm dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
+    wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz && \
+    tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz && \
+    rm dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
 
-COPY assets config database .env.docker ./
+COPY assets database .env.docker ./
 COPY --from=build /tmp/app ./
 
 ENTRYPOINT [ "dockerize", "-template", ".env.docker:.env", "./app"]
