@@ -1,36 +1,46 @@
-FROM golang:1.15.6-alpine3.12 AS build
+# syntax = docker/dockerfile:latest
+FROM golang:1.19.1-alpine3.16 AS build
+
+ARG GOPATH="/go"
+ARG GOMODCACHE=${GOPATH}/pkg/mod
+ARG GOCACHE="/root/.cache/go-build"
+
+ENV GOMODCACHE=${GOMODCACHE}
+ENV GOCACHE=${GOCACHE}
 
 WORKDIR /go/src/app
 
-# ARGS does not work outside IMAGE
-ARG MODE="dev" 
+RUN apk update && \
+    apk add build-base
 
-RUN apk add --no-cache build-base \ 
-&& apk add --no-cache wget \ 
-&& apk add  --no-cache curl \
-&& curl -sfL $(curl -s https://api.github.com/repos/powerman/dockerize/releases/latest | grep -i /dockerize-$(uname -s)-$(uname -m)\" | cut -d\" -f4) | install /dev/stdin /usr/local/bin/dockerize
+COPY go.* ./
 
-COPY . .
+RUN --mount=type=cache,mode=0777,target=${GOCACHE} \
+    --mount=type=cache,mode=0777,target=${GOMODCACHE} \
+    go mod download
 
-# If mod arg is equal to DEV then rename .env.example to .env
-RUN if [[ ${MODE} == "dev" ]]; then mv .env.example .env ; fi 
-# If mod arg is equal to DOCKER then rename .env.docker to .env else .ev.testing to .env
-RUN if [[ ${MODE} == "docker" ]]; then mv .env.docker .env ; else mv .env.testing .env ; fi 
+COPY . ./
 
-RUN go build -o app
+RUN --mount=type=cache,mode=0777,target=${GOCACHE} \
+    --mount=type=cache,mode=0777,target=${GOMODCACHE} \
+    go build -o /tmp/app
 
-# Use alpine image
 FROM alpine 
-
 WORKDIR /app
 
-# Here copy our builded app from /go/src/app to /app/
-COPY --from=build /go/src/app/app /app/
-# Copy ENV
-# We can also specify at runtime by -e flag.
-COPY --from=build /go/src/app/.env /app/
+ENV MODE="docker"
+ENV DOCKERIZE_VERSION=v0.6.1
 
-EXPOSE 3000
+RUN set -ex; \
+    apk update && \
+    apk add --no-cache wget build-base && \
+    wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz && \
+    tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz && \
+    rm dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
 
-ENTRYPOINT ["./app"]
+COPY assets database .env.docker ./
+COPY --from=build /tmp/app ./
 
+ENTRYPOINT [ "dockerize", "-template", ".env.docker:.env", "./app"]
+
+CMD ["-h"]
