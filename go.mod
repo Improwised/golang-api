@@ -12,7 +12,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.10.7
-	github.com/mattn/go-sqlite3 v1.14.15
+	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/rs/xid v1.4.0
 	github.com/rubenv/sql-migrate v1.2.0
 	github.com/sirupsen/logrus v1.9.0
