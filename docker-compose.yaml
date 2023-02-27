@@ -1,13 +1,15 @@
-version: "3.7"
+version: "3.8"
 services:
   postgresdb:
-    image: postgres:12-alpine
+    image: postgres:15.2-alpine
     environment:
       POSTGRES_USER: golang-api
       POSTGRES_PASSWORD: golang-api
       POSTGRES_DB: golang-api
     ports:
     - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   adminer:
     image: adminer
@@ -18,3 +20,6 @@ services:
     - ADMINER_DEFAULT_SERVER=postgresdb
     depends_on:
     - postgresdb
+
+volumes:
+  pgdata:
