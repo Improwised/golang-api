@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"github.com/Improwised/golang-api/middleware"
 	"sync"
+
+	"github.com/Improwised/golang-api/middleware"
 
 	controller "github.com/Improwised/golang-api/controllers/api/v1"
 	"github.com/doug-martin/goqu/v9"

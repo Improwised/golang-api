@@ -1,11 +1,9 @@
 package cli
 
 import (
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/Improwised/golang-api/middleware"
 	"go.uber.org/zap"
@@ -41,26 +39,22 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 				return err
 			}
 
-			// Call when SIGINT or SIGTERM received
-			c := make(chan os.Signal, 1)
-			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+			interrupt := make(chan os.Signal, 1)
+			signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM)
 			go func() {
-				<-c
-				logger.Info("Gracefully shutting down...")
-				if err := app.Shutdown(); err != nil {
-					logger.Panic("Error while shutdown server", zap.Error(err))
+				if err := app.Listen(cfg.Port); err != nil {
+					logger.Panic(err.Error())
 				}
 			}()
 
-			if err := app.Listen(cfg.Port); err != nil {
-				log.Panic(err)
+			<-interrupt
+			logger.Info("gracefully shutting down...")
+			if err := app.Shutdown(); err != nil {
+				logger.Panic("error while shutdown server", zap.Error(err))
 			}
 
-			logger.Info("Server stopped to receive new requests or connection, and closing in 10 seconds...")
-			time.Sleep(time.Second * 10)
-
+			logger.Info("server stopped to receive new requests or connection.")
 			return nil
-
 		},
 	}
 
