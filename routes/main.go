@@ -3,9 +3,10 @@ package routes
 import (
 	"sync"
 
-	"github.com/Improwised/golang-api/middleware"
+	"go.uber.org/zap"
 
 	controller "github.com/Improwised/golang-api/controllers/api/v1"
+	"github.com/Improwised/golang-api/middleware"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v2"
 )
@@ -13,10 +14,14 @@ import (
 var mu sync.Mutex
 
 // Setup func
-func Setup(app *fiber.App, goqu *goqu.Database) error {
+func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger) error {
 	mu.Lock()
 
+	app.Use(middleware.LogHandler(logger))
+
+	// Make sure static asset bind move before logger
 	app.Static("/assets/", "./assets")
+
 	app.Get("/docs", func(c *fiber.Ctx) error {
 		return c.Render("./assets/index.html", fiber.Map{})
 	})

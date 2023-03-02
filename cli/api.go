@@ -5,7 +5,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Improwised/golang-api/middleware"
 	"go.uber.org/zap"
 
 	"github.com/Improwised/golang-api/config"
@@ -25,16 +24,13 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 			// Create fiber app
 			app := fiber.New(fiber.Config{})
 
-			// Middleware
-			app.Use(middleware.Handler(logger))
-
 			db, err := database.Connect(cfg.DB)
 			if err != nil {
 				return err
 			}
 
 			// setup routes
-			err = routes.Setup(app, db)
+			err = routes.Setup(app, db, logger)
 			if err != nil {
 				return err
 			}

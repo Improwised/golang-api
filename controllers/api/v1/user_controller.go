@@ -32,14 +32,14 @@ func NewUserController(goqu *goqu.Database) (*UserController, error) {
 //
 // For retrieve users.
 //
-//     Consumes:
-//     - application/json
+//	    Consumes:
+//	    - application/json
 //
-//     Schemes: http, https
+//	    Schemes: http, https
 //
-//     Responses:
-//       200: userGetResponse
-//		 500: genericError
+//	    Responses:
+//	      200: userGetResponse
+//			 500: genericError
 func (ctrl *UserController) UserGet(c *fiber.Ctx) error {
 
 	userID := c.Params("user_id")
@@ -51,7 +51,7 @@ func (ctrl *UserController) UserGet(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
 	}
-	return utils.JSONWrite(c, http.StatusOK, user)
+	return utils.JSONSuccess(c, http.StatusOK, user)
 }
 
 // UserGetRequestWrapper for get user request params
@@ -79,14 +79,14 @@ type UserGetResponseWrapper struct {
 //
 // For create new user.
 //
-//     Consumes:
-//     - application/json
+//	Consumes:
+//	- application/json
 //
-//     Schemes: http, https
+//	Schemes: http, https
 //
-//     Responses:
-//       201: userCreateResponse
-//       500: genericError
+//	Responses:
+//	  201: userCreateResponse
+//	  500: genericError
 func (ctrl *UserController) UserCreate(c *fiber.Ctx) error {
 
 	var user models.User
@@ -103,7 +103,7 @@ func (ctrl *UserController) UserCreate(c *fiber.Ctx) error {
 
 	c.Response().Header.Del("Set-Cookie")
 
-	return utils.JSONWrite(c, http.StatusCreated, user)
+	return utils.JSONSuccess(c, http.StatusCreated, user)
 }
 
 // UserCreateRequestWrapper for Create user request params
