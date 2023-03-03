@@ -19,6 +19,7 @@ type AppConfig struct {
 	Debug         bool   `envconfig:"DEBUG"`
 	Env           string `envconfig:"APP_ENV"`
 	Port          string `envconfig:"APP_PORT"`
+	Secret        string `envconfig:"JWT_SECRET"`
 	DB            DBConfig
 }
 

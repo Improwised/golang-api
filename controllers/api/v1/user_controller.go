@@ -1,138 +1,100 @@
 package v1
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 
+	"github.com/Improwised/golang-api/constants"
 	"github.com/Improwised/golang-api/models"
+	"github.com/Improwised/golang-api/pkg/structs"
 	"github.com/Improwised/golang-api/utils"
 	"github.com/doug-martin/goqu/v9"
+	"go.uber.org/zap"
+	"gopkg.in/go-playground/validator.v9"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 // UserController for user controllers
 type UserController struct {
-	model *models.UserModel
+	model  *models.UserModel
+	logger *zap.Logger
 }
 
 // NewUserController returns a user
-func NewUserController(goqu *goqu.Database) (*UserController, error) {
+func NewUserController(goqu *goqu.Database, logger *zap.Logger) (*UserController, error) {
 	userModel, err := models.InitUserModel(goqu)
 	if err != nil {
 		return nil, err
 	}
 	return &UserController{
-		model: &userModel,
+		model:  &userModel,
+		logger: logger,
 	}, nil
 }
 
-// UserGet returns a user
-// swagger:route GET /users/user_id USERS userGetRequest
+// UserGet get the user by id
+// swagger:route GET /users/{userId} Users RequestGetUser
 //
-// For retrieve users.
+// Get a user.
 //
-//	    Consumes:
-//	    - application/json
+//		Consumes:
+//		- application/json
 //
-//	    Schemes: http, https
+//		Schemes: http, https
 //
-//	    Responses:
-//	      200: userGetResponse
-//			 500: genericError
-func (ctrl *UserController) UserGet(c *fiber.Ctx) error {
-
-	userID := c.Params("user_id")
-	user := &models.User{
-		ID: userID,
-	}
-
-	err := ctrl.model.GetUser(user)
+//		Responses:
+//		  200: ResponseGetUser
+//	   400: GenericResFailNotFound
+//		  500: GenericResError
+func (ctrl *UserController) GetUser(c *fiber.Ctx) error {
+	userID := c.Params(constants.ParamUid)
+	user, err := ctrl.model.GetById(userID)
 	if err != nil {
-		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
+		if err == sql.ErrNoRows {
+			return utils.JSONFail(c, http.StatusNotFound, constants.UserNotExist)
+		}
+		ctrl.logger.Error("error while get user by id", zap.Any("id", userID), zap.Error(err))
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrGetUser)
 	}
 	return utils.JSONSuccess(c, http.StatusOK, user)
 }
 
-// UserGetRequestWrapper for get user request params
+// CreateUser registers a user
+// swagger:route POST /users Users RequestCreateUser
 //
-// swagger:parameters userGetRequest
-type UserGetRequestWrapper struct {
-	// in: path
-	UserID string `json:"user_id"`
-}
+// Register a user.
+//
+//		Consumes:
+//		- application/json
+//
+//		Schemes: http, https
+//
+//		Responses:
+//		  201: ResponseCreateUser
+//	   400: GenericResFailBadRequest
+//		  500: GenericResError
+func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 
-// UserGetResponseWrapper for get user response
-//
-// swagger:response userGetResponse
-type UserGetResponseWrapper struct {
-	User struct {
-		ID        string `json:"id"`
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Email     string `json:"email"`
-	} `json:"user"`
-}
+	var userReq structs.ReqRegisterUser
 
-// UserCreate registers a user
-// swagger:route POST /users USERS userCreateRequest
-//
-// For create new user.
-//
-//	Consumes:
-//	- application/json
-//
-//	Schemes: http, https
-//
-//	Responses:
-//	  201: userCreateResponse
-//	  500: genericError
-func (ctrl *UserController) UserCreate(c *fiber.Ctx) error {
-
-	var user models.User
-
-	err := json.Unmarshal(c.Body(), &user)
+	err := json.Unmarshal(c.Body(), &userReq)
 	if err != nil {
-		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
+		return utils.JSONFail(c, http.StatusBadRequest, err.Error())
 	}
 
-	err = ctrl.model.InsertUser(&user)
+	validate := validator.New()
+	err = validate.Struct(userReq)
 	if err != nil {
-		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
+		return utils.JSONFail(c, http.StatusBadRequest, utils.ValidatorErrorString(err))
 	}
 
-	c.Response().Header.Del("Set-Cookie")
+	user, err := ctrl.model.InsertUser(models.User{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles})
+	if err != nil {
+		ctrl.logger.Error("error while insert user", zap.Error(err))
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrInsertUser)
+	}
 
 	return utils.JSONSuccess(c, http.StatusCreated, user)
-}
-
-// UserCreateRequestWrapper for Create user request params
-//
-// swagger:parameters userCreateRequest
-type UserCreateRequestWrapper struct {
-	// in: body
-	User struct {
-		// Required: true
-		FirstName string `json:"first_name" db:"first_name" validate:"required"`
-		// Required: true
-		LastName string `json:"last_name" db:"last_name" validate:"required"`
-		// Required: true
-		Email string `json:"email" db:"email" validate:"required"`
-		// Required: true
-		Password string `json:"password" db:"password" validate:"required"`
-		// Required: true
-		Roles string `json:"roles" db:"roles" validate:"required"`
-	} `json:"user"`
-}
-
-// UserCreateResponseWrapper for Create user response
-//
-// swagger:response userCreateResponse
-type UserCreateResponseWrapper struct {
-	User struct {
-		ID        string `json:"id"`
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Email     string `json:"email"`
-	} `json:"user"`
 }

@@ -1,94 +1,92 @@
 package v1
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/Improwised/golang-api/config"
+	"github.com/Improwised/golang-api/constants"
 	"github.com/Improwised/golang-api/models"
+	jwt "github.com/Improwised/golang-api/pkg/jwt"
+	"github.com/Improwised/golang-api/pkg/structs"
 	"github.com/Improwised/golang-api/utils"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type AuthController struct {
-	model *models.UserModel
+	model  *models.UserModel
+	logger *zap.Logger
+	config config.AppConfig
 }
 
-func NewAuthController(goqu *goqu.Database) (*AuthController, error) {
+func NewAuthController(goqu *goqu.Database, logger *zap.Logger, config config.AppConfig) (*AuthController, error) {
 	userModel, err := models.InitUserModel(goqu)
 	if err != nil {
 		return nil, err
 	}
 	return &AuthController{
-		model: &userModel,
+		model:  &userModel,
+		logger: logger,
+		config: config,
 	}, nil
 }
 
-// DoAuth returns auth user
-// swagger:route POST /login AUTH doAuthRequest
+// DoAuth authenticate user with email and password
+// swagger:route POST /login Auth RequestAuthnUser
 //
-// For login user.
+// Authenticate user with email and password.
 //
-//     Consumes:
-//     - application/json
+//			Consumes:
+//			- application/json
 //
-//     Schemes: http, https
+//			Schemes: http, https
 //
-//     Responses:
-//       200: userGetResponse
-//		 500: genericError
+//			Responses:
+//			  200: ResponseAuthnUser
+//		   400: GenericResFailBadRequest
+//	    401: ResForbiddenRequest
+//			  500: GenericResError
 func (ctrl *AuthController) DoAuth(c *fiber.Ctx) error {
-	var secret = config.GetConfigByName("JWT_SECRET")
+	var reqLoginUser structs.ReqLoginUser
 
-	var user models.User
-
-	err := json.Unmarshal(c.Body(), &user)
+	err := json.Unmarshal(c.Body(), &reqLoginUser)
 	if err != nil {
-		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
+		return utils.JSONError(c, http.StatusBadRequest, err.Error())
 	}
 
-	err = ctrl.model.GetUser(&user)
+	validate := validator.New()
+	err = validate.Struct(reqLoginUser)
 	if err != nil {
-		return utils.JSONError(c, http.StatusInternalServerError, err.Error())
+		return utils.JSONFail(c, http.StatusBadRequest, utils.ValidatorErrorString(err))
 	}
 
-	if user.Email != "" && user.Password != "" {
-		// Create token
-		token := jwt.New(jwt.SigningMethodHS256)
-
-		// Set claims
-		claims := token.Claims.(jwt.MapClaims)
-		claims["email"] = user.Email
-		claims["password"] = user.Password
-
-		// Generate encoded token and send it as response.
-		t, err := token.SignedString([]byte(secret))
-		if err != nil {
-			return c.SendStatus(http.StatusInternalServerError)
+	user, err := ctrl.model.GetUserByEmailAndPassword(reqLoginUser.Email, reqLoginUser.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return utils.JSONFail(c, http.StatusUnauthorized, constants.InvalidCredentials)
 		}
-
-		userCookie := &fiber.Cookie{
-			Name:    "token",
-			Value:   t,
-			Expires: time.Now().Add(1 * time.Hour),
-		}
-		c.Cookie(userCookie)
-
-		return utils.JSONSuccess(c, http.StatusOK, "Ok")
+		ctrl.logger.Error("error while get user by email and password", zap.Error(err), zap.Any("email", reqLoginUser.Email))
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrLoginUser)
 	}
-	return utils.JSONError(c, http.StatusInternalServerError, "Invalid email or password.")
-}
 
-// DoAuthRequestWrapper for auth user request
-//
-// swagger:parameters doAuthRequest
-type DoAuthRequestWrapper struct {
-	// in: body
-	Body struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+	// token is valid for 30 days
+	token, err := jwt.CreateToken(ctrl.config, user.ID, time.Now().Add(time.Hour*1))
+	if err != nil {
+		ctrl.logger.Error("error while creating token", zap.Error(err), zap.Any("id", user.ID))
+		return utils.JSONFail(c, http.StatusInternalServerError, constants.ErrLoginUser)
 	}
+
+	userCookie := &fiber.Cookie{
+		Name:    constants.CookieUser,
+		Value:   token,
+		Expires: time.Now().Add(1 * time.Hour),
+	}
+	c.Cookie(userCookie)
+
+	return utils.JSONSuccess(c, http.StatusOK, user)
 }
