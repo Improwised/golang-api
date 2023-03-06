@@ -1,10 +1,13 @@
 package models
 
 import (
+	"database/sql"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/rs/xid"
-	"gopkg.in/go-playground/validator.v9"
 )
+
+// This boilerplate we are storing password in plan format!
 
 // UserTable represent table name
 const UserTable = "users"
@@ -15,7 +18,7 @@ type User struct {
 	FirstName string `json:"first_name" db:"first_name" validate:"required"`
 	LastName  string `json:"last_name" db:"last_name" validate:"required"`
 	Email     string `json:"email" db:"email" validate:"required"`
-	Password  string `json:"password,omitempty" db:"password" validate:"required"`
+	Password  string `json:"-" db:"password" validate:"required"`
 	Roles     string `json:"roles,omitempty" db:"roles" validate:"required"`
 	CreatedAt string `json:"created_at,omitempty" db:"created_at,omitempty"`
 	UpdatedAt string `json:"updated_at,omitempty" db:"updated_at,omitempty"`
@@ -33,7 +36,7 @@ func InitUserModel(goqu *goqu.Database) (UserModel, error) {
 	}, nil
 }
 
-// GetUser retrieve user
+// GetUsers list all users
 func (model *UserModel) GetUsers() ([]User, error) {
 	var users []User
 	if err := model.db.From(UserTable).ScanStructs(&users); err != nil {
@@ -42,33 +45,34 @@ func (model *UserModel) GetUsers() ([]User, error) {
 	return users, nil
 }
 
-// GetUser retrieve user
-func (model *UserModel) GetUser(user *User) error {
-	if _, err := model.db.From(UserTable).Where(goqu.Ex{
-		"id": user.ID,
+// GetUser get user by id
+func (model *UserModel) GetById(id string) (User, error) {
+	user := User{}
+	found, err := model.db.From(UserTable).Where(goqu.Ex{
+		"id": id,
 	}).Select(
 		"id",
 		"first_name",
 		"last_name",
 		"email",
-	).ScanStruct(user); err != nil {
-		return err
+	).ScanStruct(&user)
+
+	if err != nil {
+		return user, err
 	}
-	return nil
+
+	if !found {
+		return user, sql.ErrNoRows
+	}
+
+	return user, err
 }
 
 // InsertUser retrieve user
-func (model *UserModel) InsertUser(user *User) error {
-	val := validator.New()
-
+func (model *UserModel) InsertUser(user User) (User, error) {
 	user.ID = xid.New().String()
 
-	err := val.Struct(user)
-	if err != nil {
-		return err
-	}
-
-	_, err = model.db.Insert(UserTable).Rows(
+	_, err := model.db.Insert(UserTable).Rows(
 		goqu.Record{
 			"id":         user.ID,
 			"first_name": user.FirstName,
@@ -79,12 +83,32 @@ func (model *UserModel) InsertUser(user *User) error {
 		},
 	).Executor().Exec()
 	if err != nil {
-		return err
+		return user, err
 	}
 
-	if err = model.GetUser(user); err != nil {
-		return err
+	user, err = model.GetById(user.ID)
+	return user, err
+}
+
+func (model *UserModel) GetUserByEmailAndPassword(email string, password string) (User, error) {
+	user := User{}
+	found, err := model.db.From(UserTable).Where(goqu.Ex{
+		"email":    email,
+		"password": password,
+	}).Select(
+		"id",
+		"first_name",
+		"last_name",
+		"email",
+	).ScanStruct(&user)
+
+	if err != nil {
+		return user, err
 	}
 
-	return nil
+	if !found {
+		return user, sql.ErrNoRows
+	}
+
+	return user, err
 }

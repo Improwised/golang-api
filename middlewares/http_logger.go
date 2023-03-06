@@ -1,8 +1,10 @@
-package middleware
+package middlewares
 
 import (
-	"github.com/Improwised/golang-api/utils"
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/samber/lo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -20,14 +22,14 @@ var (
 )
 
 // Handler will log each request
-func Handler(logger *zap.Logger) fiber.Handler {
+func LogHandler(logger *zap.Logger) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		err := ctx.Next()
 		if err != nil {
 			return err
 		}
 
-		exits, _ := utils.InArray(ctx.Path(), ignorePathList)
+		exits := lo.Contains(ignorePathList, ctx.Path()) || strings.HasPrefix(string(ctx.Response().Header.ContentType()), "image/")
 		if !exits {
 			zapCoreField = []zapcore.Field{
 				zap.String("host", ctx.Hostname()),

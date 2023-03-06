@@ -16,6 +16,69 @@
   "host": "localhost",
   "basePath": "/api/v1",
   "paths": {
+    "/health/db": {
+      "get": {
+        "description": "Database health check",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Healthcheck"
+        ],
+        "summary": "Database health check",
+        "operationId": "dbHealthCheck",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/GenericResOk"
+          },
+          "500": {
+            "$ref": "#/responses/GenericResError"
+          }
+        }
+      }
+    },
+    "/health/overall": {
+      "get": {
+        "description": "Overall health check",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Healthcheck"
+        ],
+        "summary": "Overall health check",
+        "operationId": "overallHealthCheck",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/GenericResOk"
+          },
+          "500": {
+            "$ref": "#/responses/GenericResError"
+          }
+        }
+      }
+    },
+    "/health/self": {
+      "get": {
+        "description": "self health check",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Healthcheck"
+        ],
+        "summary": "self health check",
+        "operationId": "selfHealthCheck",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/GenericResOk"
+          },
+          "500": {
+            "$ref": "#/responses/GenericResError"
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "consumes": [
@@ -26,14 +89,15 @@
           "https"
         ],
         "tags": [
-          "AUTH"
+          "Auth"
         ],
-        "summary": "For login user.",
-        "operationId": "doAuthRequest",
+        "summary": "Authenticate user with email and password.",
+        "operationId": "RequestAuthnUser",
         "parameters": [
           {
             "name": "Body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -51,10 +115,16 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/userGetResponse"
+            "$ref": "#/responses/ResponseAuthnUser"
+          },
+          "400": {
+            "$ref": "#/responses/GenericResFailBadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/ResForbiddenRequest"
           },
           "500": {
-            "$ref": "#/responses/genericError"
+            "$ref": "#/responses/GenericResError"
           }
         }
       }
@@ -69,24 +139,17 @@
           "https"
         ],
         "tags": [
-          "USERS"
+          "Users"
         ],
-        "summary": "For create new user.",
-        "operationId": "userCreateRequest",
+        "summary": "Register a user.",
+        "operationId": "RequestCreateUser",
         "parameters": [
           {
-            "x-go-name": "User",
-            "name": "user",
+            "name": "Body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
-              "required": [
-                "first_name",
-                "last_name",
-                "email",
-                "password",
-                "roles"
-              ],
               "properties": {
                 "email": {
                   "type": "string",
@@ -114,15 +177,18 @@
         ],
         "responses": {
           "201": {
-            "$ref": "#/responses/userCreateResponse"
+            "$ref": "#/responses/ResponseCreateUser"
+          },
+          "400": {
+            "$ref": "#/responses/GenericResFailBadRequest"
           },
           "500": {
-            "$ref": "#/responses/genericError"
+            "$ref": "#/responses/GenericResError"
           }
         }
       }
     },
-    "/users/user_id": {
+    "/users/{userId}": {
       "get": {
         "consumes": [
           "application/json"
@@ -132,204 +198,312 @@
           "https"
         ],
         "tags": [
-          "USERS"
+          "Users"
         ],
-        "summary": "For retrieve users.",
-        "operationId": "userGetRequest",
+        "summary": "Get a user.",
+        "operationId": "RequestGetUser",
         "parameters": [
           {
             "type": "string",
-            "x-go-name": "UserID",
-            "name": "user_id",
+            "x-go-name": "UserId",
+            "name": "userId",
             "in": "path",
             "required": true
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/userGetResponse"
+            "$ref": "#/responses/ResponseGetUser"
+          },
+          "400": {
+            "$ref": "#/responses/GenericResFailNotFound"
           },
           "500": {
-            "$ref": "#/responses/genericError"
+            "$ref": "#/responses/GenericResError"
           }
         }
       }
-    }
-  },
-  "definitions": {
-    "User": {
-      "description": "User model",
-      "type": "object",
-      "properties": {
-        "created_at": {
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "email": {
-          "type": "string",
-          "x-go-name": "Email"
-        },
-        "first_name": {
-          "type": "string",
-          "x-go-name": "FirstName"
-        },
-        "id": {
-          "type": "string",
-          "x-go-name": "ID"
-        },
-        "last_name": {
-          "type": "string",
-          "x-go-name": "LastName"
-        },
-        "password": {
-          "type": "string",
-          "x-go-name": "Password"
-        },
-        "roles": {
-          "type": "string",
-          "x-go-name": "Roles"
-        },
-        "updated_at": {
-          "type": "string",
-          "x-go-name": "UpdatedAt"
-        }
-      },
-      "x-go-package": "github.com/Improwised/golang-api/models"
     }
   },
   "responses": {
-    "createUserResponse": {
-      "description": "UserCreateResponseWrapper for create user response",
+    "GenericResError": {
+      "description": "Unexpected error occurred",
       "schema": {
         "type": "object",
         "properties": {
-          "user": {
-            "$ref": "#/definitions/User"
-          }
-        }
-      }
-    },
-    "genericError": {
-      "description": "SwaggerGenericErrorResponse is store swagger generic error response",
-      "schema": {
-        "type": "object",
-        "required": [
-          "status",
-          "status_code",
-          "error"
-        ],
-        "properties": {
-          "error": {
-            "type": "string",
-            "x-go-name": "Error",
-            "example": "Invalid value for x"
+          "data": {
+            "type": "object",
+            "x-go-name": "Data"
           },
-          "status": {
-            "type": "string",
-            "x-go-name": "Status",
-            "example": "Error"
-          },
-          "status_code": {
-            "type": "integer",
-            "format": "int64",
-            "x-go-name": "StatusCode",
-            "example": 400
-          }
-        }
-      }
-    },
-    "genericResponse": {
-      "description": "SwaggerGenericSuccessResponse is store swagger generic response",
-      "schema": {
-        "type": "object",
-        "required": [
-          "status",
-          "status_code",
-          "message"
-        ],
-        "properties": {
           "message": {
             "type": "string",
-            "x-go-name": "Message",
-            "example": "ok"
+            "x-go-name": "Message"
           },
           "status": {
             "type": "string",
-            "x-go-name": "Status",
-            "example": "Success"
-          },
-          "status_code": {
-            "type": "integer",
-            "format": "int64",
-            "x-go-name": "StatusCode",
-            "example": 200
+            "enum": [
+              "error"
+            ],
+            "x-go-name": "Status"
           }
         }
       }
     },
-    "getUsersResponse": {
-      "description": "UserGetResponseWrapper for get user response",
+    "GenericResFailBadRequest": {
+      "description": "Fail due to user invalid input",
       "schema": {
         "type": "object",
         "properties": {
-          "user": {
-            "$ref": "#/definitions/User"
+          "data": {
+            "type": "object",
+            "x-go-name": "Data"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "fail"
+            ],
+            "x-go-name": "Status"
           }
         }
       }
     },
-    "userCreateResponse": {
-      "description": "UserCreateResponseWrapper for Create user response",
+    "GenericResFailConflict": {
+      "description": "Server understand request but refuse to authorize it",
       "schema": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string",
-            "x-go-name": "Email"
+          "data": {
+            "type": "object",
+            "x-go-name": "Data"
           },
-          "first_name": {
+          "status": {
             "type": "string",
-            "x-go-name": "FirstName"
-          },
-          "id": {
-            "type": "string",
-            "x-go-name": "ID"
-          },
-          "last_name": {
-            "type": "string",
-            "x-go-name": "LastName"
+            "enum": [
+              "fail"
+            ],
+            "x-go-name": "Status"
           }
         }
-      },
-      "headers": {
-        "user": {}
       }
     },
-    "userGetResponse": {
-      "description": "UserGetResponseWrapper for get user response",
+    "GenericResFailNotFound": {
+      "description": "Fail due to resource not exists",
       "schema": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string",
-            "x-go-name": "Email"
+          "data": {
+            "type": "object",
+            "x-go-name": "Data"
           },
-          "first_name": {
+          "status": {
             "type": "string",
-            "x-go-name": "FirstName"
-          },
-          "id": {
-            "type": "string",
-            "x-go-name": "ID"
-          },
-          "last_name": {
-            "type": "string",
-            "x-go-name": "LastName"
+            "enum": [
+              "fail"
+            ],
+            "x-go-name": "Status"
           }
         }
-      },
-      "headers": {
-        "user": {}
+      }
+    },
+    "GenericResFailUnprocessableEntity": {
+      "description": "Fail due to server understand request but unable to process",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "x-go-name": "Data"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "fail"
+            ],
+            "x-go-name": "Status"
+          }
+        }
+      }
+    },
+    "GenericResOk": {
+      "description": "Response is okay",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ],
+            "x-go-name": "Status"
+          }
+        }
+      }
+    },
+    "ResForbiddenRequest": {
+      "description": "Fail due to user invalid input",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "x-go-name": "Data"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "fail"
+            ],
+            "x-go-name": "Status"
+          }
+        }
+      }
+    },
+    "ResponseAuthnUser": {
+      "description": "",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "x-go-name": "CreatedAt"
+              },
+              "email": {
+                "type": "string",
+                "x-go-name": "Email"
+              },
+              "first_name": {
+                "type": "string",
+                "x-go-name": "FirstName"
+              },
+              "id": {
+                "type": "string",
+                "x-go-name": "ID"
+              },
+              "last_name": {
+                "type": "string",
+                "x-go-name": "LastName"
+              },
+              "roles": {
+                "type": "string",
+                "x-go-name": "Roles"
+              },
+              "updated_at": {
+                "type": "string",
+                "x-go-name": "UpdatedAt"
+              }
+            },
+            "x-go-name": "Data"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ],
+            "x-go-name": "Status"
+          }
+        }
+      }
+    },
+    "ResponseCreateUser": {
+      "description": "",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "x-go-name": "CreatedAt"
+              },
+              "email": {
+                "type": "string",
+                "x-go-name": "Email"
+              },
+              "first_name": {
+                "type": "string",
+                "x-go-name": "FirstName"
+              },
+              "id": {
+                "type": "string",
+                "x-go-name": "ID"
+              },
+              "last_name": {
+                "type": "string",
+                "x-go-name": "LastName"
+              },
+              "roles": {
+                "type": "string",
+                "x-go-name": "Roles"
+              },
+              "updated_at": {
+                "type": "string",
+                "x-go-name": "UpdatedAt"
+              }
+            },
+            "x-go-name": "Data"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ],
+            "x-go-name": "Status"
+          }
+        }
+      }
+    },
+    "ResponseGetUser": {
+      "description": "",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "x-go-name": "CreatedAt"
+              },
+              "email": {
+                "type": "string",
+                "x-go-name": "Email"
+              },
+              "first_name": {
+                "type": "string",
+                "x-go-name": "FirstName"
+              },
+              "id": {
+                "type": "string",
+                "x-go-name": "ID"
+              },
+              "last_name": {
+                "type": "string",
+                "x-go-name": "LastName"
+              },
+              "roles": {
+                "type": "string",
+                "x-go-name": "Roles"
+              },
+              "updated_at": {
+                "type": "string",
+                "x-go-name": "UpdatedAt"
+              }
+            },
+            "x-go-name": "Data"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ],
+            "x-go-name": "Status"
+          }
+        }
       }
     }
   }

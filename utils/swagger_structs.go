@@ -1,83 +1,147 @@
 package utils
 
-import "github.com/Improwised/golang-api/models"
+import (
+	"github.com/Improwised/golang-api/models"
+	"github.com/Improwised/golang-api/pkg/structs"
+)
 
-const successStatusText string = "success"
-const errorStatusText string = "error"
-
-// SwaggerGenericErrorResponse is store swagger generic error response
-// swagger:response genericError
-type SwaggerGenericErrorResponse struct {
-	// in: body
+// swagger:parameters RequestCreateUser
+type RequestCreateUser struct {
+	// in:body
+	// required: true
 	Body struct {
-		// Required: true
-		// Example: Error
+		structs.ReqRegisterUser
+	}
+}
+
+// swagger:response ResponseCreateUser
+type ResponseCreateUser struct {
+	// in:body
+	Body struct {
+		// enum: success
 		Status string `json:"status"`
-		// Required: true
-		// Example: 400
-		StatusCode int `json:"status_code"`
-		// Required: true
-		// Example: Invalid value for x
-		Error string `json:"error"`
-	}
+		Data   struct {
+			models.User
+		} `json:"data"`
+	} `json:"body"`
 }
 
-// SwaggerGenericSuccessResponse is store swagger generic response
-// swagger:response genericResponse
-type SwaggerGenericSuccessResponse struct {
-	// in: body
+// swagger:parameters RequestGetUser
+type RequestGetUser struct {
+	// in:path
+	UserId string `json:"userId"`
+}
+
+// swagger:response ResponseGetUser
+type ResponseGetUser struct {
+	// in:body
 	Body struct {
-		// Required: true
-		// Example: Success
+		// enum: success
 		Status string `json:"status"`
-		// Required: true
-		// Example: 200
-		StatusCode int `json:"status_code"`
-		// Required: true
-		// Example: ok
-		Message string `json:"message"`
+		Data   struct {
+			models.User
+		} `json:"data"`
+	} `json:"body"`
+}
+
+// swagger:parameters RequestAuthnUser
+type RequestAuthnUser struct {
+	// in:body
+	// required: true
+	Body struct {
+		structs.ReqLoginUser
 	}
 }
 
-// GenericErrorResponse is store generic error response related data
-type GenericErrorResponse struct {
-	Status     string `json:"status"`
-	StatusCode int    `json:"status_code"`
-	Error      string `json:"error"`
+// swagger:response ResponseAuthnUser
+type ResponseAuthnUser struct {
+	// in:body
+	Body struct {
+		// enum: success
+		Status string `json:"status"`
+		Data   struct {
+			models.User
+		} `json:"data"`
+	} `json:"body"`
 }
 
-// GenericSuccessResponse is store generic success response related data
-type GenericSuccessResponse struct {
-	Status     string `json:"status"`
-	StatusCode int    `json:"status_code"`
-	Message    string `json:"message"`
+////////////////////
+// --- GENERIC ---//
+////////////////////
+
+// Response is okay
+// swagger:response GenericResOk
+type ResOK struct {
+	// in:body
+	Body struct {
+		// enum:success
+		Status string `json:"status"`
+	}
 }
 
-// UserGetResponseWrapper for get user response
-// swagger:response getUsersResponse
-type UserGetResponseWrapper struct {
+// Fail due to user invalid input
+// swagger:response GenericResFailBadRequest
+type ResFailBadRequest struct {
 	// in: body
 	Body struct {
-		User models.User `json:"user"`
-	}
+		// enum: fail
+		Status string      `json:"status"`
+		Data   interface{} `json:"data"`
+	} `json:"body"`
 }
 
-// UserCreateRequestWrapper for user request
-// swagger:parameters createUserRequest
-type UserCreateRequestWrapper struct {
+// Fail due to user invalid input
+// swagger:response ResForbiddenRequest
+type ResForbiddenRequest struct {
 	// in: body
 	Body struct {
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Email     string `json:"email"`
-	}
+		// enum: fail
+		Status string      `json:"status"`
+		Data   interface{} `json:"data"`
+	} `json:"body"`
 }
 
-// UserCreateResponseWrapper for create user response
-// swagger:response createUserResponse
-type UserCreateResponseWrapper struct {
+// Server understand request but refuse to authorize it
+// swagger:response GenericResFailConflict
+type ResFailConflict struct {
 	// in: body
 	Body struct {
-		User models.User `json:"user"`
-	}
+		// enum: fail
+		Status string      `json:"status"`
+		Data   interface{} `json:"data"`
+	} `json:"body"`
+}
+
+// Fail due to server understand request but unable to process
+// swagger:response GenericResFailUnprocessableEntity
+type ResFailUnprocessableEntity struct {
+	// in: body
+	Body struct {
+		// enum: fail
+		Status string      `json:"status"`
+		Data   interface{} `json:"data"`
+	} `json:"body"`
+}
+
+// Fail due to resource not exists
+// swagger:response GenericResFailNotFound
+type ResFailNotFound struct {
+	// in: body
+	Body struct {
+		// enum: fail
+		Status string      `json:"status"`
+		Data   interface{} `json:"data"`
+	} `json:"body"`
+}
+
+// Unexpected error occurred
+// swagger:response GenericResError
+type ResError struct {
+	// in: body
+	Body struct {
+		// enum: error
+		Status  string      `json:"status"`
+		Data    interface{} `json:"data"`
+		Message string      `json:"message"`
+	} `json:"body"`
 }

@@ -1,15 +1,15 @@
 // Golang API.
 //
-//     Schemes: https
-//     Host: localhost
-//     BasePath: /api/v1
-//     Version: 0.0.1-alpha
+//	Schemes: https
+//	Host: localhost
+//	BasePath: /api/v1
+//	Version: 0.0.1-alpha
 //
-//     Consumes:
-//     - application/json
+//	Consumes:
+//	- application/json
 //
-//     Produces:
-//     - application/json
+//	Produces:
+//	- application/json
 //
 // swagger:meta
 package main

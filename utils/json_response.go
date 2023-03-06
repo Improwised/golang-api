@@ -1,42 +1,23 @@
 package utils
 
 import (
-	"encoding/json"
+	"clevergo.tech/jsend"
 	"github.com/gofiber/fiber/v2"
-	"net/http"
 )
 
-//JSONSuccess is a generic success output writer
-func JSONSuccess(c *fiber.Ctx, statusCode int, message string) error {
-	return JSONWrite(c, statusCode, &GenericSuccessResponse{
-		Status:     successStatusText,
-		StatusCode: statusCode,
-		Message:    message,
-	})
+// JSONSuccess is a generic success output writer
+func JSONSuccess(c *fiber.Ctx, statusCode int, data interface{}) error {
+	return c.Status(statusCode).JSON(jsend.New(data))
 }
 
-//JSONError is a generic error output writer
+// JSONFail is a generic fail output writer
+// JSONFail can used for 4xx status code response
+func JSONFail(c *fiber.Ctx, statusCode int, data interface{}) error {
+	return c.Status(statusCode).JSON(jsend.NewFail(data))
+}
+
+// JSONError is a generic error output writer
+// JSONError can used for 5xx status code response
 func JSONError(c *fiber.Ctx, statusCode int, err string) error {
-	return JSONWrite(c, statusCode, &GenericErrorResponse{
-		Status:     errorStatusText,
-		StatusCode: statusCode,
-		Error:      err,
-	})
-}
-
-//JSONWrite is a json response writer that will output the JSON-encoded data
-func JSONWrite(c *fiber.Ctx, statusCode int, data interface{}) error {
-	c.Response().Header.Set("Content-Type", "application/json; charset=utf-8")
-	c.Response().SetStatusCode(statusCode)
-
-	byteData, err := json.Marshal(data)
-	if err != nil {
-		return c.JSON(GenericErrorResponse{
-			Status:     errorStatusText,
-			StatusCode: http.StatusInternalServerError,
-			Error:      err.Error(),
-		})
-	}
-	c.Response().SetBody(byteData)
-	return nil
+	return c.Status(statusCode).JSON(jsend.NewError(err, statusCode, nil))
 }
