@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -22,7 +21,6 @@ func TestJWT(t *testing.T) {
 	})
 
 	t.Run("parse token", func(t *testing.T) {
-		fmt.Println(token)
 		claims, err := ParseToken(cfg, token)
 		assert.Nil(t, err)
 		assert.Equal(t, subject, claims.Subject())
