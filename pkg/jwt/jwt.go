@@ -20,7 +20,6 @@ alg: HS256
 payload: {
 	subject: uid
 	issuer: golang-api.improwised.com
-	exp: 30 days
 }
 We are also using jti for implementation signout all device
 We are using symmetric key methodology for sign token
@@ -28,7 +27,6 @@ We are using symmetric key methodology for sign token
 */
 
 // ParseToken parse, validate the jwt token
-// Return ErrInvalidToken if invalid issuer, invalid signature, invalid audiance, or expire token
 // On valid token it returns the decoded token
 func ParseToken(config config.AppConfig, token string) (jwt.Token, error) {
 	key, err := jwk.FromRaw([]byte(config.Secret))
