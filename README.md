@@ -123,6 +123,8 @@ Migrations are like **version control for your database**, allowing your team to
     - Currently we have two middleware [http_logger](middleware/http_logger.go) & [jwt](middleware/jwt.go)
     - [http_logger](middleware/http_logger.go): This middleware enusres that it logs every incoming request to logger.
     - [jwt](middleware/jwt.go): JWT validates the user authentication, in routes we need to set which routes need authentication, so middleware will check for auth on that request.
+- #### Service:
+    - Also known as the Business Layer, contains the functionality that compounds the core of the application, thus becoming highly reusable for controllers.
 - #### Model:
     - Model refer to database tables, currently we have followed structure that one table have one model.
     - When you create a model it should inside of `models` folder.
@@ -170,3 +172,9 @@ Migrations are like **version control for your database**, allowing your team to
 - After that you can call `m.Run()` which executes all testcases that are available in testcases, Also `m.Run()` return  exit status code.
 - After `m.RUN()` we must delete data that was inserted.
 - When you run testcase with `make test` it will also display `code coverage` which helps you to determine percentage of code covered in your testcases.
+
+### Generators
+We are using `mockery` for generate mock functions for interface. We can generate mock using below command.
+```shell
+$> go generate ./...
+```

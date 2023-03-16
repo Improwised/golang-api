@@ -11,6 +11,7 @@ import (
 	"github.com/Improwised/golang-api/models"
 	jwt "github.com/Improwised/golang-api/pkg/jwt"
 	"github.com/Improwised/golang-api/pkg/structs"
+	"github.com/Improwised/golang-api/services"
 	"github.com/Improwised/golang-api/utils"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v2"
@@ -19,9 +20,9 @@ import (
 )
 
 type AuthController struct {
-	model  *models.UserModel
-	logger *zap.Logger
-	config config.AppConfig
+	userService *services.UserService
+	logger      *zap.Logger
+	config      config.AppConfig
 }
 
 func NewAuthController(goqu *goqu.Database, logger *zap.Logger, config config.AppConfig) (*AuthController, error) {
@@ -29,10 +30,13 @@ func NewAuthController(goqu *goqu.Database, logger *zap.Logger, config config.Ap
 	if err != nil {
 		return nil, err
 	}
+
+	userSvc := services.NewUserService(&userModel)
+
 	return &AuthController{
-		model:  &userModel,
-		logger: logger,
-		config: config,
+		userService: userSvc,
+		logger:      logger,
+		config:      config,
 	}, nil
 }
 
@@ -65,7 +69,7 @@ func (ctrl *AuthController) DoAuth(c *fiber.Ctx) error {
 		return utils.JSONFail(c, http.StatusBadRequest, utils.ValidatorErrorString(err))
 	}
 
-	user, err := ctrl.model.GetUserByEmailAndPassword(reqLoginUser.Email, reqLoginUser.Password)
+	user, err := ctrl.userService.Authenticate(reqLoginUser.Email, reqLoginUser.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return utils.JSONFail(c, http.StatusUnauthorized, constants.InvalidCredentials)

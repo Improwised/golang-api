@@ -9,6 +9,7 @@ import (
 
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
+	"github.com/Improwised/golang-api/pkg/events"
 	"github.com/Improwised/golang-api/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
@@ -24,13 +25,20 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 			// Create fiber app
 			app := fiber.New(fiber.Config{})
 
+			events := events.NewEventBus()
+
 			db, err := database.Connect(cfg.DB)
 			if err != nil {
 				return err
 			}
 
+			err = events.SubscribeAll()
+			if err != nil {
+				return err
+			}
+
 			// setup routes
-			err = routes.Setup(app, db, logger, cfg)
+			err = routes.Setup(app, db, logger, cfg, events)
 			if err != nil {
 				return err
 			}
