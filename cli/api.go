@@ -25,7 +25,7 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 			// Create fiber app
 			app := fiber.New(fiber.Config{})
 
-			events := events.NewEventBus()
+			events := events.NewEventBus(logger)
 
 			db, err := database.Connect(cfg.DB)
 			if err != nil {

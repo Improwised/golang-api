@@ -1,11 +1,12 @@
 package events
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/Improwised/golang-api/constants"
 	"github.com/Improwised/golang-api/pkg/structs"
 	evbus "github.com/asaskevich/EventBus"
+	"go.uber.org/zap"
 )
 
 //go:generate mockery --name IEvents
@@ -18,14 +19,17 @@ type Events struct {
 	Bus evbus.Bus
 }
 
-func NewEventBus() *Events {
+var logger *zap.Logger = nil
+
+func NewEventBus(lg *zap.Logger) *Events {
+	logger = lg
 	return &Events{
 		Bus: evbus.New(),
 	}
 }
 
 func userRegistered(data structs.EventUserRegistered) {
-	log.Printf("User Registered email: %s", data.Email)
+	logger.Info(fmt.Sprintf("User Registered email: %s", data.Email))
 	// We can send message to SQS, Redis, or any other place
 }
 
