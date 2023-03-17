@@ -124,7 +124,7 @@ Migrations are like **version control for your database**, allowing your team to
     - [http_logger](middleware/http_logger.go): This middleware enusres that it logs every incoming request to logger.
     - [jwt](middleware/jwt.go): JWT validates the user authentication, in routes we need to set which routes need authentication, so middleware will check for auth on that request.
 - #### Service:
-    - Also known as the Business Layer, contains the functionality that compounds the core of the application, thus becoming highly reusable for controllers.
+    - Also known as the Business Layer, contains the functionality that compounds the core of the application, thus becoming highly reusable for controllers, workers, jobs, and CLI.
 - #### Model:
     - Model refer to database tables, currently we have followed structure that one table have one model.
     - When you create a model it should inside of `models` folder.
