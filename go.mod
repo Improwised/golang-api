@@ -16,7 +16,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/rs/xid v1.4.0
-	github.com/rubenv/sql-migrate v1.3.1
+	github.com/rubenv/sql-migrate v1.4.0
 	github.com/samber/lo v1.37.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
