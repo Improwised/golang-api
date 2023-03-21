@@ -7,7 +7,9 @@ import (
 
 	"github.com/Improwised/golang-api/constants"
 	"github.com/Improwised/golang-api/models"
+	"github.com/Improwised/golang-api/pkg/events"
 	"github.com/Improwised/golang-api/pkg/structs"
+	"github.com/Improwised/golang-api/services"
 	"github.com/Improwised/golang-api/utils"
 	"github.com/doug-martin/goqu/v9"
 	"go.uber.org/zap"
@@ -18,19 +20,24 @@ import (
 
 // UserController for user controllers
 type UserController struct {
-	model  *models.UserModel
-	logger *zap.Logger
+	userService *services.UserService
+	logger      *zap.Logger
+	event       *events.Events
 }
 
 // NewUserController returns a user
-func NewUserController(goqu *goqu.Database, logger *zap.Logger) (*UserController, error) {
+func NewUserController(goqu *goqu.Database, logger *zap.Logger, event *events.Events) (*UserController, error) {
 	userModel, err := models.InitUserModel(goqu)
 	if err != nil {
 		return nil, err
 	}
+
+	userSvc := services.NewUserService(&userModel)
+
 	return &UserController{
-		model:  &userModel,
-		logger: logger,
+		userService: userSvc,
+		logger:      logger,
+		event:       event,
 	}, nil
 }
 
@@ -50,7 +57,7 @@ func NewUserController(goqu *goqu.Database, logger *zap.Logger) (*UserController
 //		  500: GenericResError
 func (ctrl *UserController) GetUser(c *fiber.Ctx) error {
 	userID := c.Params(constants.ParamUid)
-	user, err := ctrl.model.GetById(userID)
+	user, err := ctrl.userService.GetUser(userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return utils.JSONFail(c, http.StatusNotFound, constants.UserNotExist)
@@ -90,7 +97,7 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 		return utils.JSONFail(c, http.StatusBadRequest, utils.ValidatorErrorString(err))
 	}
 
-	user, err := ctrl.model.InsertUser(models.User{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles})
+	user, err := ctrl.userService.RegisterUser(models.User{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles}, ctrl.event)
 	if err != nil {
 		ctrl.logger.Error("error while insert user", zap.Error(err))
 		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrInsertUser)

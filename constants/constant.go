@@ -35,3 +35,8 @@ const (
 	ErrHealthCheckDb   = "error while checking health of database"
 	ErrUnauthenticated = "error verifing user identity"
 )
+
+// Events
+const (
+	EventUserRegistered = "event:userRegistered"
+)
