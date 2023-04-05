@@ -41,6 +41,6 @@ RUN set -ex; \
 COPY assets database .env.docker ./
 COPY --from=build /tmp/app ./
 
-ENTRYPOINT [ "dockerize", "-template", ".env.docker:.env", "./app"]
+ENTRYPOINT [ "dockerize", "-template", ".env.example:.env", "./app"]
 
 CMD ["-h"]

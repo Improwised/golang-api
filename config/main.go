@@ -1,14 +1,13 @@
 package config
 
 import (
+	"fmt"
+	"log"
 	"os"
-	"regexp"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
-
-const projectDirName = "golang-api"
 
 // AllConfig variable of type AppConfig
 var AllConfig AppConfig
@@ -31,7 +30,7 @@ func GetConfig() AppConfig {
 
 	err := envconfig.Process("APP_PORT", &AllConfig)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return AllConfig
@@ -42,18 +41,19 @@ func GetConfigByName(key string) string {
 	err := godotenv.Load()
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return os.Getenv(key)
 }
 
-// LoadTestEnv loads env vars from .env.testing
+// LoadTestEnv loads environment variables from .env.testing file
 func LoadTestEnv() AppConfig {
-	re := regexp.MustCompile(`^(.*` + projectDirName + `)`)
-	cwd, _ := os.Getwd()
-	rootPath := re.Find([]byte(cwd))
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	_ = godotenv.Load(string(rootPath) + `/.env.testing`)
+	_ = godotenv.Load(fmt.Sprintf("%s/.env.testing", cwd))
 	return GetConfig()
 }

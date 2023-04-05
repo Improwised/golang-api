@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -9,6 +10,8 @@ import (
 )
 
 func TestJWT(t *testing.T) {
+	os.Chdir("../../")
+
 	var token string = ""
 	var err error = nil
 	var subject string = "11112"
