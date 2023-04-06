@@ -23,7 +23,7 @@ func NewHealthController(db *goqu.Database, logger *zap.Logger) (*HealthControll
 }
 
 // Overall check overall health of application as well as dependencies health check
-// swagger:route GET /health/overall Healthcheck overallHealthCheck
+// swagger:route GET /healthz Healthcheck overallHealthCheck
 //
 //	Overall health check
 //
@@ -46,26 +46,12 @@ func (hc *HealthController) Overall(ctx *fiber.Ctx) error {
 	return utils.JSONSuccess(ctx, http.StatusOK, "ok")
 }
 
-// Self health check
-// swagger:route GET /health/self Healthcheck selfHealthCheck
-//
-//	self health check
-//
-//	self health check
-//
-// Produces:
-// - application/json
-//
-// Responses:
-//
-//	200: GenericResOk
-//	500: GenericResError
 func (hc *HealthController) Self(ctx *fiber.Ctx) error {
 	return utils.JSONSuccess(ctx, http.StatusOK, "ok")
 }
 
 // Database health check
-// swagger:route GET /health/db Healthcheck dbHealthCheck
+// swagger:route GET /healthz/db Healthcheck dbHealthCheck
 //
 //	Database health check
 //

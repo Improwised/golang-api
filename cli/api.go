@@ -13,6 +13,8 @@ import (
 	"github.com/Improwised/golang-api/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
+
+	pMetrix "github.com/Improwised/golang-api/pkg/prometheus"
 )
 
 // GetAPICommandDef runs app
@@ -22,9 +24,13 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 		Short: "To start api",
 		Long:  `To start api`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+
 			// Create fiber app
 			app := fiber.New(fiber.Config{})
 
+			promMetrics := pMetrix.InitPrometheusMetrics()
+
+			// Init eventbus
 			events := events.NewEventBus(logger)
 
 			db, err := database.Connect(cfg.DB)
@@ -38,7 +44,7 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 			}
 
 			// setup routes
-			err = routes.Setup(app, db, logger, cfg, events)
+			err = routes.Setup(app, db, logger, cfg, events, promMetrics)
 			if err != nil {
 				return err
 			}

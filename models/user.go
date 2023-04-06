@@ -112,3 +112,7 @@ func (model *UserModel) GetUserByEmailAndPassword(email string, password string)
 
 	return user, err
 }
+
+func (model *UserModel) CountUsers() (int64, error) {
+	return model.db.From(UserTable).Count()
+}

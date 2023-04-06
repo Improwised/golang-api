@@ -3,6 +3,7 @@ package middlewares
 import (
 	"strings"
 
+	pMetrix "github.com/Improwised/golang-api/pkg/prometheus"
 	"github.com/gofiber/fiber/v2"
 	"github.com/samber/lo"
 	"go.uber.org/zap"
@@ -22,14 +23,14 @@ var (
 )
 
 // Handler will log each request
-func LogHandler(logger *zap.Logger) fiber.Handler {
+func LogHandler(logger *zap.Logger, pMetrics *pMetrix.PrometheusMetrics) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		err := ctx.Next()
 		if err != nil {
 			return err
 		}
 
-		exits := lo.Contains(ignorePathList, ctx.Path()) || strings.HasPrefix(string(ctx.Response().Header.ContentType()), "image/")
+		exits := lo.Contains(ignorePathList, ctx.Path()) || strings.HasPrefix(string(ctx.Response().Header.ContentType()), "image/") || strings.HasPrefix(string(ctx.Response().Header.ContentType()), "text/")
 		if !exits {
 			zapCoreField = []zapcore.Field{
 				zap.String("host", ctx.Hostname()),
@@ -49,6 +50,19 @@ func LogHandler(logger *zap.Logger) fiber.Handler {
 			} else {
 				logger.Error("handled error request", zapCoreField...)
 			}
+		}
+
+		// For /metrics endpoint count in next request
+		// Because /metrics endpoint response is send first and
+		// Respected status code counter increase next
+		if ctx.Response().StatusCode() >= 200 && ctx.Response().StatusCode() < 300 {
+			pMetrics.RequestsMetrics.WithLabelValues("2xx").Inc()
+		} else if ctx.Response().StatusCode() >= 300 && ctx.Response().StatusCode() < 400 {
+			pMetrics.RequestsMetrics.WithLabelValues("3xx").Inc()
+		} else if ctx.Response().StatusCode() >= 400 && ctx.Response().StatusCode() < 500 {
+			pMetrics.RequestsMetrics.WithLabelValues("4xx").Inc()
+		} else if ctx.Response().StatusCode() >= 500 {
+			pMetrics.RequestsMetrics.WithLabelValues("5xx").Inc()
 		}
 		return nil
 	}
