@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/Improwised/golang-api/models"
-	pMetrix "github.com/Improwised/golang-api/pkg/prometheus"
+	pMetrics "github.com/Improwised/golang-api/pkg/prometheus"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
@@ -13,10 +13,10 @@ import (
 type MetricsController struct {
 	userModel *models.UserModel
 	logger    *zap.Logger
-	pMetrics  *pMetrix.PrometheusMetrics
+	pMetrics  *pMetrics.PrometheusMetrics
 }
 
-func InitMetricsController(db *goqu.Database, logger *zap.Logger, pMetrix *pMetrix.PrometheusMetrics) (*MetricsController, error) {
+func InitMetricsController(db *goqu.Database, logger *zap.Logger, pMetrics *pMetrics.PrometheusMetrics) (*MetricsController, error) {
 	userModel, err := models.InitUserModel(db)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func InitMetricsController(db *goqu.Database, logger *zap.Logger, pMetrix *pMetr
 	return &MetricsController{
 		userModel: &userModel,
 		logger:    logger,
-		pMetrics:  pMetrix,
+		pMetrics:  pMetrics,
 	}, nil
 }
 

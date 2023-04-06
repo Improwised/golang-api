@@ -3,7 +3,7 @@ package middlewares
 import (
 	"strings"
 
-	pMetrix "github.com/Improwised/golang-api/pkg/prometheus"
+	pMetrics "github.com/Improwised/golang-api/pkg/prometheus"
 	"github.com/gofiber/fiber/v2"
 	"github.com/samber/lo"
 	"go.uber.org/zap"
@@ -23,7 +23,7 @@ var (
 )
 
 // Handler will log each request
-func LogHandler(logger *zap.Logger, pMetrics *pMetrix.PrometheusMetrics) fiber.Handler {
+func LogHandler(logger *zap.Logger, pMetrics *pMetrics.PrometheusMetrics) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		err := ctx.Next()
 		if err != nil {

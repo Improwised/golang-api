@@ -11,7 +11,7 @@ import (
 	controller "github.com/Improwised/golang-api/controllers/api/v1"
 	"github.com/Improwised/golang-api/middlewares"
 	"github.com/Improwised/golang-api/pkg/events"
-	pMetrix "github.com/Improwised/golang-api/pkg/prometheus"
+	pMetrics "github.com/Improwised/golang-api/pkg/prometheus"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,7 +19,7 @@ import (
 var mu sync.Mutex
 
 // Setup func
-func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, events *events.Events, pMetrics *pMetrix.PrometheusMetrics) error {
+func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, events *events.Events, pMetrics *pMetrics.PrometheusMetrics) error {
 	mu.Lock()
 
 	app.Use(middlewares.LogHandler(logger, pMetrics))
@@ -50,7 +50,7 @@ func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config confi
 		return err
 	}
 
-	err = metrixController(app, goqu, logger, pMetrics)
+	err = metricsController(app, goqu, logger, pMetrics)
 	if err != nil {
 		return err
 	}
@@ -92,12 +92,12 @@ func healthCheckController(app *fiber.App, goqu *goqu.Database, logger *zap.Logg
 	return nil
 }
 
-func metrixController(app *fiber.App, db *goqu.Database, logger *zap.Logger, pMetrics *pMetrix.PrometheusMetrics) error {
-	metrixController, err := controller.InitMetricsController(db, logger, pMetrics)
+func metricsController(app *fiber.App, db *goqu.Database, logger *zap.Logger, pMetrics *pMetrics.PrometheusMetrics) error {
+	metricsController, err := controller.InitMetricsController(db, logger, pMetrics)
 	if err != nil {
 		return nil
 	}
 
-	app.Get("/metrics", metrixController.Metrics)
+	app.Get("/metrics", metricsController.Metrics)
 	return nil
 }
