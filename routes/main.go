@@ -2,7 +2,6 @@ package routes
 
 import (
 	"fmt"
-	"net/http"
 	"sync"
 
 	"go.uber.org/zap"
@@ -29,11 +28,6 @@ func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config confi
 
 	app.Get("/docs", func(c *fiber.Ctx) error {
 		return c.Render("./assets/index.html", fiber.Map{})
-	})
-
-	app.Get("/4xx", func(c *fiber.Ctx) error {
-		logger.Debug("DEBUG LEVEL")
-		return c.SendStatus(http.StatusBadRequest)
 	})
 
 	router := app.Group("/api")
