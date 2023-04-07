@@ -14,7 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
 
-	pMetrix "github.com/Improwised/golang-api/pkg/prometheus"
+	pMetrics "github.com/Improwised/golang-api/pkg/prometheus"
 )
 
 // GetAPICommandDef runs app
@@ -28,7 +28,7 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 			// Create fiber app
 			app := fiber.New(fiber.Config{})
 
-			promMetrics := pMetrix.InitPrometheusMetrics()
+			promMetrics := pMetrics.InitPrometheusMetrics()
 
 			// Init eventbus
 			events := events.NewEventBus(logger)
