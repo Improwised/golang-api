@@ -16,28 +16,7 @@
   "host": "localhost",
   "basePath": "/api/v1",
   "paths": {
-    "/health/db": {
-      "get": {
-        "description": "Database health check",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Healthcheck"
-        ],
-        "summary": "Database health check",
-        "operationId": "dbHealthCheck",
-        "responses": {
-          "200": {
-            "$ref": "#/responses/GenericResOk"
-          },
-          "500": {
-            "$ref": "#/responses/GenericResError"
-          }
-        }
-      }
-    },
-    "/health/overall": {
+    "/healthz": {
       "get": {
         "description": "Overall health check",
         "produces": [
@@ -58,17 +37,17 @@
         }
       }
     },
-    "/health/self": {
+    "/healthz/db": {
       "get": {
-        "description": "self health check",
+        "description": "Database health check",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Healthcheck"
         ],
-        "summary": "self health check",
-        "operationId": "selfHealthCheck",
+        "summary": "Database health check",
+        "operationId": "dbHealthCheck",
         "responses": {
           "200": {
             "$ref": "#/responses/GenericResOk"
@@ -127,6 +106,19 @@
             "$ref": "#/responses/GenericResError"
           }
         }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "description": "Prometheus metrics endpoint",
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "Metrics"
+        ],
+        "summary": "Prometheus metrics endpoint",
+        "operationId": "ReqMetrics"
       }
     },
     "/users": {
