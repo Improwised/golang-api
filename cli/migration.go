@@ -3,11 +3,13 @@ package cli
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
 	_ "github.com/go-sql-driver/mysql" // for mysql dialect
 	_ "github.com/lib/pq"              // for postgres dialect
-	"github.com/rubenv/sql-migrate"
+	migrate "github.com/rubenv/sql-migrate"
 	"github.com/spf13/cobra"
 )
 
@@ -70,7 +72,10 @@ func GetMigrationCommandDef(cfg config.AppConfig) cobra.Command {
 
 func createTestingDBMigration(cfg config.AppConfig, migrationType string) {
 	if cfg.Env == "local" || cfg.Env == "testing" {
-		runSQLiteMigration(cfg, migrationType, true, "database/go-test-db.db")
+		err := runSQLiteMigration(cfg, migrationType, true, "database/go-test-db.db")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

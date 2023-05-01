@@ -10,10 +10,12 @@ import (
 )
 
 func TestJWT(t *testing.T) {
-	os.Chdir("../../")
+	var err error
+
+	err = os.Chdir("../../")
+	assert.Nil(t, err)
 
 	var token string = ""
-	var err error = nil
 	var subject string = "11112"
 	cfg := config.LoadTestEnv()
 
