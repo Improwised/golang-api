@@ -21,7 +21,11 @@ var client *resty.Client = nil
 var db *goqu.Database = nil
 
 func TestMain(m *testing.M) {
-	os.Chdir("../../../")
+	err := os.Chdir("../../../")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	cfg := config.LoadTestEnv()
 	logger, err := logger.NewRootLogger(true, true)
 	if err != nil {
@@ -57,7 +61,7 @@ func TestMain(m *testing.M) {
 	serverRunning := false
 	for count := 0; count < 100; count += 1 {
 		client = client.SetTimeout(time.Second * 2)
-		res, _ := client.R().EnableTrace().Get("/healthz")
+		res, err := client.R().EnableTrace().Get("/healthz")
 		if err == nil {
 			log.Println("received status code", res.StatusCode())
 		}

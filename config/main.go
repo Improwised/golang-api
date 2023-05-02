@@ -24,11 +24,14 @@ type AppConfig struct {
 
 // GetConfig Collects all configs
 func GetConfig() AppConfig {
-	_ = godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	AllConfig = AppConfig{}
 
-	err := envconfig.Process("APP_PORT", &AllConfig)
+	err = envconfig.Process("APP_PORT", &AllConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,6 +57,9 @@ func LoadTestEnv() AppConfig {
 		log.Fatal(err)
 	}
 
-	_ = godotenv.Load(fmt.Sprintf("%s/.env.testing", cwd))
+	err = godotenv.Load(fmt.Sprintf("%s/.env.testing", cwd))
+	if err != nil {
+		log.Fatal(err)
+	}
 	return GetConfig()
 }

@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	_ "github.com/lib/pq"
+
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/constants"
 	"github.com/Improwised/golang-api/database"
@@ -15,7 +17,9 @@ import (
 )
 
 func TestUserService(t *testing.T) {
-	os.Chdir("../")
+	err := os.Chdir("../")
+	assert.Nil(t, err)
+
 	cfg := config.LoadTestEnv()
 
 	db, err := database.Connect(cfg.DB)
