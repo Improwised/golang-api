@@ -16,7 +16,7 @@ require (
 	github.com/lestrrat-go/jwx/v2 v2.0.9
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.16
-	github.com/prometheus/client_golang v1.15.0
+	github.com/prometheus/client_golang v1.15.1
 	github.com/rs/xid v1.5.0
 	github.com/rubenv/sql-migrate v1.4.0
 	github.com/samber/lo v1.38.1
