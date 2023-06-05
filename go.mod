@@ -22,7 +22,7 @@ require (
 	github.com/samber/lo v1.38.1
 	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/cobra v1.7.0
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.9.0
 	gopkg.in/go-playground/validator.v9 v9.31.0
