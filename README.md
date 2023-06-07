@@ -52,20 +52,23 @@
 
 for ex: `start` commands run `go run app.go api` if your app.go is somewhere else then you need to update this file for paths to work properly.
 
-- **make start-dev** : This will start your app with `nodemon` which watch for changes in your directory and reload go.
+- **make start-api-dev** : This will start your app with `nodemon` which watch for changes in your directory and reload go.
 
-- **make start** : To start api, it basically runs `go run app.go`
+- **make start-api** : To start api, it basically runs `go run app.go`
 
-- **make create-migration file_name=migration_name** : This command will create migration `up` and `down` both respectively, you need to pass `file_name={migration_name}`
+- **make migrate file_name={MIGRATION_FILE_NAME}** : This command will create migration `up` and `down` both respectively, you need to pass `file_name={migration_name}`
 
-- **make build**  : It will build binary of your project.
+- **make build app_name={BINARY_NAME}**  : It will build binary of your project.
+
+- **make install app_name={BINARY_NAME}**: It will generate optimized binary with `-s` and `-w` ldflags.
 
 - **make test** : To run testcase for entire project, `.env.testing` env need to use while writing testcase, you need to load 
 
-- **make swagger-genrate** : To genrate swagger docs, This command will download binary if not exist.
+- **make test-wo-cache**: To run testcases with without cache.
 
-- **make migration-up** : To run `Up` migrations.
-- **make migration-down** : To run `Down` migrations, Which technically revert migration that are being perform by `Up`.
+- **make swagger-gen** : To genrate swagger docs, This command will download binary if not exist.
+
+- **make migrate-up** : To run `Up` migrations.
 ---
 ## Migration
 
