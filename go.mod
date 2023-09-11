@@ -6,7 +6,7 @@ require (
 	clevergo.tech/jsend v1.1.3
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/doug-martin/goqu/v9 v9.18.0
-	github.com/getsentry/sentry-go v0.22.0
+	github.com/getsentry/sentry-go v0.24.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gofiber/adaptor/v2 v2.2.1
