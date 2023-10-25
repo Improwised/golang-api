@@ -78,7 +78,7 @@ func (ctrl *AuthController) DoAuth(c *fiber.Ctx) error {
 		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrLoginUser)
 	}
 
-	// token is valid for 30 days
+	// token is valid for 1 hour
 	token, err := jwt.CreateToken(ctrl.config, user.ID, time.Now().Add(time.Hour*1))
 	if err != nil {
 		ctrl.logger.Error("error while creating token", zap.Error(err), zap.Any("id", user.ID))
