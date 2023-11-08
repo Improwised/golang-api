@@ -26,7 +26,7 @@ type AppConfig struct {
 func GetConfig() AppConfig {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		log.Println("warning .env file not found, scanning from OS ENV")
 	}
 
 	AllConfig = AppConfig{}
