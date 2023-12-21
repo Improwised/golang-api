@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Improwised/golang-api/constants"
@@ -79,7 +80,7 @@ func (hc *HealthController) Db(ctx *fiber.Ctx) error {
 //////////////////////
 
 func healthDb(db *goqu.Database) error {
-	_, err := db.Query("SELECT 1")
+	_, err := db.ExecContext(context.TODO(), "SELECT 1")
 	if err != nil {
 		return err
 	}
