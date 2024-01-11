@@ -16,10 +16,39 @@ services:
     restart: always
     ports:
     - 8080:8080
-    environment: 
+    environment:
     - ADMINER_DEFAULT_SERVER=postgresdb
     depends_on:
     - postgresdb
+
+  kratos_migrate:
+    image: oryd/kratos:v1.0.0
+    environment:
+      - DSN=postgres://postgres:postgres@db:5432/postgres?sslmode=disable
+      - LOG_LEVEL=trace
+    command: migrate sql -e --yes
+    restart: on-failure
+    depends_on:
+      - db
+    networks:
+      - app
+
+  kratos:
+    image: oryd/kratos:v1.0.0
+    ports:
+      - '4433:4433' # public
+      - '4434:4434' # admin
+    environment:
+      - LOG_LEVEL=trace
+    command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
+    restart: always
+    depends_on:
+      - db
+      - kratos_migrate
+    volumes:
+      - "/home/shaktirajsinh.zala/workspace/golang-api/pkg/kratos:/etc/config/kratos"
+    networks:
+      - app
 
 volumes:
   pgdata:

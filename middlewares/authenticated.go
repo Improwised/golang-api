@@ -17,6 +17,12 @@ func (m *Middleware) Authenticated(c *fiber.Ctx) error {
 	if token == "" {
 		return utils.JSONFail(c, http.StatusUnauthorized, constants.Unauthenticated)
 	}
+	if m.config.Kratos.IsRequired {
+		sessionID := c.Cookies("ory_kratos_sesion")
+		if sessionID == "" {
+			return utils.JSONFail(c, http.StatusUnauthorized, constants.Unauthenticated)
+		}
+	}
 
 	claims, err := jwt.ParseToken(m.config, token)
 	if err != nil {
