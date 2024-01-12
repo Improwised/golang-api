@@ -19,7 +19,11 @@ type AppConfig struct {
 	Env           string `envconfig:"APP_ENV"`
 	Port          string `envconfig:"APP_PORT"`
 	Secret        string `envconfig:"JWT_SECRET"`
+	MQDialect     string `envconfig:"MQ_DIALECT"`
 	DB            DBConfig
+	AMQB          AmqpConfig
+	Redis         RedisConfig
+	Kafka         KafkaConfig
 }
 
 // GetConfig Collects all configs

@@ -9,6 +9,7 @@ import (
 	"github.com/Improwised/golang-api/models"
 	"github.com/Improwised/golang-api/pkg/events"
 	"github.com/Improwised/golang-api/pkg/structs"
+	"github.com/Improwised/golang-api/pkg/watermill"
 	"github.com/Improwised/golang-api/services"
 	"github.com/Improwised/golang-api/utils"
 	"github.com/doug-martin/goqu/v9"
@@ -23,10 +24,11 @@ type UserController struct {
 	userService *services.UserService
 	logger      *zap.Logger
 	event       *events.Events
+	pub         *watermill.WatermillPubliser
 }
 
 // NewUserController returns a user
-func NewUserController(goqu *goqu.Database, logger *zap.Logger, event *events.Events) (*UserController, error) {
+func NewUserController(goqu *goqu.Database, logger *zap.Logger, event *events.Events, pub *watermill.WatermillPubliser) (*UserController, error) {
 	userModel, err := models.InitUserModel(goqu)
 	if err != nil {
 		return nil, err
@@ -38,6 +40,7 @@ func NewUserController(goqu *goqu.Database, logger *zap.Logger, event *events.Ev
 		userService: userSvc,
 		logger:      logger,
 		event:       event,
+		pub:         pub,
 	}, nil
 }
 
@@ -97,6 +100,10 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 		return utils.JSONFail(c, http.StatusBadRequest, utils.ValidatorErrorString(err))
 	}
 
+	err=ctrl.pub.PublishMessages("create_user", c.Body())
+	if err != nil {
+		return utils.JSONFail(c, http.StatusBadRequest, err.Error())
+	}
 	user, err := ctrl.userService.RegisterUser(models.User{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles}, ctrl.event)
 	if err != nil {
 		ctrl.logger.Error("error while insert user", zap.Error(err))

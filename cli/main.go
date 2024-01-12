@@ -11,7 +11,10 @@ func Init(cfg config.AppConfig, logger *zap.Logger) error {
 	migrationCmd := GetMigrationCommandDef(cfg)
 	apiCmd := GetAPICommandDef(cfg, logger)
 
+	workerCmd:=GetWorkerCommandDef(cfg, logger)
+	workerCmd.PersistentFlags().String("topic", "demo", "Topic to subscribe")
+	
 	rootCmd := &cobra.Command{Use: "golang-api"}
-	rootCmd.AddCommand(&migrationCmd, &apiCmd)
+	rootCmd.AddCommand(&migrationCmd, &apiCmd, &workerCmd)
 	return rootCmd.Execute()
 }
