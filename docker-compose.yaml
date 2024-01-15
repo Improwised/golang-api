@@ -6,9 +6,11 @@ services:
       POSTGRES_USER: golang-api
       POSTGRES_PASSWORD: golang-api
       POSTGRES_DB: golang-api
+      POSTGRES_MULTIPLE_DATABASES: '"kratos-db"'
     ports:
     - 5432:5432
     volumes:
+      - ./pkg/kratos/kratos-pg-init-script:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
 
   adminer:
@@ -23,32 +25,34 @@ services:
 
   kratos_migrate:
     image: oryd/kratos:v1.0.0
+    profiles: [kratos]
     environment:
-      - DSN=postgres://postgres:postgres@db:5432/postgres?sslmode=disable
+      - DSN=postgres://golang-api:golang-api@postgresdb:5432/kratos-db?sslmode=disable
       - LOG_LEVEL=trace
     command: migrate sql -e --yes
     restart: on-failure
     depends_on:
-      - db
-    networks:
-      - app
+      - postgresdb
 
   kratos:
     image: oryd/kratos:v1.0.0
+    profiles: [kratos]
     ports:
-      - '4433:4433' # public
-      - '4434:4434' # admin
+      - '4433:${SERVE_PUBLIC_PORT:-4433}' # public
+      - '4434:${SERVE_ADMIN_PORT:-4434}' # admin
     environment:
       - LOG_LEVEL=trace
-    command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
+    env_file:
+      - .env
+
+    command: serve -c /etc/config/kratos/kratos.yml
+
     restart: always
     depends_on:
-      - db
+      - postgresdb
       - kratos_migrate
     volumes:
-      - "/home/shaktirajsinh.zala/workspace/golang-api/pkg/kratos:/etc/config/kratos"
-    networks:
-      - app
+      - "./pkg/kratos:/etc/config/kratos"
 
 volumes:
   pgdata:

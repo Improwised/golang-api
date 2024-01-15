@@ -3,6 +3,7 @@ package constants
 // variables
 const (
 	CookieUser = "user"
+	KratosCookie = "ory_kratos_session"
 )
 
 // fiber contexts
@@ -10,6 +11,11 @@ const (
 	ContextUid = "userId"
 )
 
+// kratos
+const (
+	KratosID = "kratosId"
+	KratosUserDetails = "kratossUserDetails"
+)
 // params
 const (
 	ParamUid = "userId"
@@ -34,6 +40,7 @@ const (
 	ErrInsertUser      = "error while creating user, please try after sometime"
 	ErrHealthCheckDb   = "error while checking health of database"
 	ErrUnauthenticated = "error verifing user identity"
+	ErrKratosAuth      = "error while fetching user from kratos"
 )
 
 // Events

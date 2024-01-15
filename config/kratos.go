@@ -2,9 +2,24 @@ package config
 
 // DBConfig type of db config object
 type KratosConfig struct {
-	IsRequired bool `envconfig:"KRATOS_REQUIRED"`
-	BaseURL    string `envconfig:"KRATOS_BASE_URL"`
-	UIUrl      string `envconfig:"KRATOS_UI_URL"`
-	AdminUrl   string `envconfig:"KRATOS_ADMIN_URL"`
-	PublicUrl  string `envconfig:"KRATOS_PUBLIC_URL"`
+	IsRequired bool   `envconfig:"KRATOS_REQUIRED"`
+	BaseURL    string `envconfig:"SERVE_PUBLIC_BASE_URL"`
+	UIUrl      string `envconfig:"SELF_SERVICE_DEFAULT_BROWSER_RETURN_URL"`
+	AdminUrl   string `envconfig:"SERVE_ADMIN_BASE_URL"`
+	PublicUrl  string `envconfig:"SERVE_PUBLIC_BASE_URL"`
+}
+
+type KratosUserDetails struct {
+	Identity struct {
+		ID     string `json:"id"`
+		Traits struct {
+			Name struct {
+				Last  string `json:"last"`
+				First string `json:"first"`
+			} `json:"name"`
+			Email string `json:"email"`
+		} `json:"traits"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	} `json:"identity"`
 }
