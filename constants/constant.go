@@ -41,6 +41,7 @@ const (
 	ErrHealthCheckDb   = "error while checking health of database"
 	ErrUnauthenticated = "error verifing user identity"
 	ErrKratosAuth      = "error while fetching user from kratos"
+	ErrKratosIDEmpty   = "error no session_id found in kratos cookie"
 )
 
 // Events

@@ -100,24 +100,25 @@ func (ctrl *AuthController) DoAuth(c *fiber.Ctx) error {
 }
 
 // DoKratosAuth authenticate user with kratos session id
-// swagger:route GET /auth Auth RequestAuthnUser
+// swagger:route GET /kratos/auth Auth none
 //
 // Authenticate user with kratos session id.
 //
-//			Consumes:
-//			- application/json
+//				Consumes:
+//				- application/json
 //
-//			Schemes: http, https
-//
+//				Schemes: http, https
 //			Responses:
-//			  200: ResponseAuthnUser
-//		   400: GenericResFailBadRequest
-//	    401: ResForbiddenRequest
+//		      400: GenericResFailBadRequest
 //			  500: GenericResError
 func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
 	kratosID := c.Locals(constants.KratosID)
 
-	kratosClient := resty.New().SetBaseURL(ctrl.config.Kratos.BaseURL+"/sessions").SetHeader("Cookie", fmt.Sprintf("%v=%v",constants.KratosCookie, kratosID)).SetHeader("accept", "application/json")
+	if kratosID.(string) == "" {
+		return utils.JSONError(c, http.StatusBadRequest, constants.ErrKratosIDEmpty)
+	}
+
+	kratosClient := resty.New().SetBaseURL(ctrl.config.Kratos.BaseURL+"/sessions").SetHeader("Cookie", fmt.Sprintf("%v=%v", constants.KratosCookie, kratosID)).SetHeader("accept", "application/json")
 
 	kratosUser := config.KratosUserDetails{}
 	res, err := kratosClient.R().SetResult(&kratosUser).Get("/whoami")
