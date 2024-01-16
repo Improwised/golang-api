@@ -66,7 +66,7 @@ func setupAuthController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logge
 	}
 	v1.Post("/login", authController.DoAuth)
 
-	if config.Kratos.IsRequired {
+	if config.Kratos.IsEnabled {
 		kratos := v1.Group("/kratos")
 		kratos.Get("/auth", middlewares.Authenticated, authController.DoKratosAuth)
 	}

@@ -104,13 +104,13 @@ func (ctrl *AuthController) DoAuth(c *fiber.Ctx) error {
 //
 // Authenticate user with kratos session id.
 //
-//				Consumes:
-//				- application/json
+//			Consumes:
+//			- application/json
 //
-//				Schemes: http, https
-//			Responses:
-//		      400: GenericResFailBadRequest
-//			  500: GenericResError
+//			Schemes: http, https
+//		Responses:
+//	      400: GenericResFailBadRequest
+//		  500: GenericResError
 func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
 	kratosID := c.Locals(constants.KratosID)
 
@@ -118,15 +118,11 @@ func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
 		return utils.JSONError(c, http.StatusBadRequest, constants.ErrKratosIDEmpty)
 	}
 
-	kratosClient := resty.New().SetBaseURL(ctrl.config.Kratos.BaseURL+"/sessions").SetHeader("Cookie", fmt.Sprintf("%v=%v", constants.KratosCookie, kratosID)).SetHeader("accept", "application/json")
+	kratosClient := resty.New().SetBaseURL(ctrl.config.Kratos.BaseUrl+"/sessions").SetHeader("Cookie", fmt.Sprintf("%v=%v", constants.KratosCookie, kratosID)).SetHeader("accept", "application/json")
 
 	kratosUser := config.KratosUserDetails{}
 	res, err := kratosClient.R().SetResult(&kratosUser).Get("/whoami")
-	if err != nil {
-		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosAuth)
-	}
-
-	if res.StatusCode() != http.StatusOK {
+	if err != nil || res.StatusCode() != http.StatusOK {
 		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosAuth)
 	}
 
@@ -140,13 +136,18 @@ func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
 
 	user, err := ctrl.userModel.InsertKratosUser(userStruct)
 	if err != nil {
-		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosAuth)
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosDataInsertion)
+	}
+
+	cookieExpirationTime, err := time.ParseDuration(ctrl.config.Kratos.CookieExpirationTime)
+	if err != nil {
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosCookieTime)
 	}
 
 	userCookie := &fiber.Cookie{
 		Name:    constants.KratosCookie,
 		Value:   kratosID.(string),
-		Expires: time.Now().Add(24 * time.Hour),
+		Expires: time.Now().Add(cookieExpirationTime),
 	}
 
 	c.Cookie(userCookie)

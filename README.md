@@ -83,7 +83,7 @@ Ory Kratos doesn't provide UI, You have to specify the endpoints for different U
 
 **Note:** ory Kratos is an optional integration to the boilerplate, if you want to use it you need to follow the below steps.
 
-- Inside the ```.env``` you'll have to set the ```KRATOS_REQUIRED``` for enabling the kratos integration.
+- Inside the ```.env``` you'll have to set the ```KRATOS_ENABLED``` for enabling the kratos integration.
 - According to your config requirements, you will need to change the corresponding files inside the ```/pkg/kratos``` folder. 
 - Then after that for all the endpoints you want Kratos authentication you'll have to add ```middlewares.Authenticated``` and ```authController.DoKratosAuth```. After that, you can add your own handle and write business logic over there using user details.
 - For more details, you can see the [documentation](./pkg/kratos/readme.md) section.

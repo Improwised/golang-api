@@ -9,7 +9,7 @@ This Kratos service takes configuration values from the files located inside ```
 For configuring kratos according to the requirements you'll have to update file and environment variables.
 
 ## Configuration
-1. You'll have to set ```KRATOS_REQUIRED``` environment variable to `true` to enable Kratos support.
+1. You'll have to set ```KRATOS_ENABLED``` environment variable to `true` to enable Kratos support.
 2. For all configuration values of ```kratos.yml``` there are environment variables.
     
     **Note:** Environment variables get higher priority than file configuration values. So make sure before changing values directly from the file.
