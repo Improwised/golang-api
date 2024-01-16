@@ -14,7 +14,7 @@ const (
 // kratos
 const (
 	KratosID = "kratosId"
-	KratosUserDetails = "kratossUserDetails"
+	KratosUserDetails = "kratosUserDetails"
 )
 // params
 const (
