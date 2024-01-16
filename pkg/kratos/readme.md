@@ -64,7 +64,14 @@ For all the endpoints that require Kratos authentication, You'll required to add
 route.Get("/\<end-point\>", middlewares.Authenticated, authController.DoKratosAuth)
 
 ## How Kratos Integration Works?
-You have to provide Kratos with your UI endpoint URLs, Kratos will redirect to those endpoints by initializing the flow. 
+You have to provide Kratos with your UI endpoint URLs, Kratos will redirect to those endpoints by initializing the flow.
+
+So, the flow will be,
+
+1. On initialization of user identity activities call kratos with specific functionality endpoint.
+2. After that kratos will redirect to the respective UI url provided by you inside the configuration file with `flow_id` in query param.
+3. After that on Submit you have to call the kratos with same flow_id as query param and `Form Data` in payload. 
+4. Then kratos will redirect to the `default_return_url` provided into the configuration. (*In case of registration and login, kratos will redirect to backend and then backend will store the data and set up cookie for the frontend.)    
 
 After successful authentication, it will redirect to the backend Endpoint using which we can store user details in our database.
 

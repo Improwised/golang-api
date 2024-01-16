@@ -134,7 +134,7 @@ func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
 	userStruct.CreatedAt = kratosUser.Identity.CreatedAt
 	userStruct.UpdatedAt = kratosUser.Identity.UpdatedAt
 
-	user, err := ctrl.userModel.InsertKratosUser(userStruct)
+	err = ctrl.userModel.InsertKratosUser(userStruct)
 	if err != nil {
 		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosDataInsertion)
 	}
@@ -153,7 +153,5 @@ func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
 	c.Cookie(userCookie)
 	c.Redirect(ctrl.config.Kratos.UIUrl)
 
-	c.Locals(constants.KratosUserDetails, user)
-	c.Next()
 	return nil
 }

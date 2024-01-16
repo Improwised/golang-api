@@ -91,17 +91,17 @@ func (model *UserModel) InsertUser(user User) (User, error) {
 	return user, err
 }
 
-func (model *UserModel) InsertKratosUser(user User) (User, error) {
+func (model *UserModel) InsertKratosUser(user User) error {
 	rows, err := model.db.Select(goqu.L("EXISTS ?", model.db.Select().From(UserTable).Where(goqu.L("kratos_id = ?", user.KratosID)))).Executor().Query()
 	if err != nil {
-		return User{}, err
+		return err
 	}
 
 	var exists bool
 	for rows.Next() {
 		err := rows.Scan(&exists)
 		if err != nil {
-			return User{}, err
+			return err
 		}
 	}
 
@@ -119,10 +119,10 @@ func (model *UserModel) InsertKratosUser(user User) (User, error) {
 			},
 		).Executor().Exec()
 		if err != nil {
-			return User{}, err
+			return err
 		}
 	}
-	return user, nil
+	return nil
 }
 
 func (model *UserModel) GetUserByEmailAndPassword(email string, password string) (User, error) {

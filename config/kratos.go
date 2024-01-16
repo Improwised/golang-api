@@ -6,7 +6,6 @@ type KratosConfig struct {
 	BaseUrl              string `envconfig:"SERVE_PUBLIC_BASE_URL"`
 	UIUrl                string `envconfig:"SELF_SERVICE_DEFAULT_BROWSER_RETURN_URL"`
 	AdminUrl             string `envconfig:"SERVE_ADMIN_BASE_URL"`
-	PublicUrl            string `envconfig:"SERVE_PUBLIC_BASE_URL"`
 	CookieExpirationTime string `envconfig:"KRATOS_COOKIE_EXPIRATION_TIME"`
 }
 
