@@ -79,7 +79,7 @@ Migrations are like **version control for your database**, allowing your team to
 ## Kratos Integration
 Ory Kratos provides the user identity management service and different flows for user management (signup/sign in, forgot password, reset password, etc.). For more, you can see the official [documentation](https://www.ory.sh/docs/kratos/ory-kratos-intro).
 
-Ory Kratos Does not provide UI, You have to specify the endpoints for different UI pages inside the configuration and Kratos will user them. There are some other services that you can use for demo UIs. for example `kratos-selfservice-ui-node`.
+Ory Kratos doesn't provide UI, You have to specify the endpoints for different UI pages inside the configuration and Kratos will use them. There are some other services that you can use for demo UIs. for example `kratos-selfservice-ui-node`.
 
 **Note:** ory Kratos is an optional integration to the boilerplate, if you want to use it you need to follow the below steps.
 
