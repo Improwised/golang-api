@@ -61,7 +61,7 @@ For configuring kratos according to the requirements you'll have to update file 
 For all the endpoints that require Kratos authentication, You'll required to add middleware and auth endpoints before it while establishing routes.
 
 #### Example
-route.Get("/\<end-point\>", middlewares.Authenticated, authController.DoKratosAuth)
+route.Get("/\<end-point\>", middlewares.Authenticated)
 
 ## How Kratos Integration Works?
 You have to provide Kratos with your UI endpoint URLs, Kratos will redirect to those endpoints by initializing the flow.
