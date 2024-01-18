@@ -69,6 +69,9 @@ func setupAuthController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logge
 	if config.Kratos.IsEnabled {
 		kratos := v1.Group("/kratos")
 		kratos.Get("/auth", middlewares.Authenticated, authController.DoKratosAuth)
+
+		// For updates of user profile on kratos, we need to sync those details to our database, that's why this endpoint will be used as after hook in kratos settings flow.
+		kratos.Get("/update-user", middlewares.Authenticated, authController.KratosUserUpdate)
 	}
 	return nil
 }

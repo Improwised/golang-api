@@ -114,16 +114,9 @@ func (ctrl *AuthController) DoAuth(c *fiber.Ctx) error {
 func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
 	kratosID := c.Locals(constants.KratosID)
 
-	if kratosID.(string) == "" {
-		return utils.JSONError(c, http.StatusBadRequest, constants.ErrKratosIDEmpty)
-	}
-
-	kratosClient := resty.New().SetBaseURL(ctrl.config.Kratos.BaseUrl+"/sessions").SetHeader("Cookie", fmt.Sprintf("%v=%v", constants.KratosCookie, kratosID)).SetHeader("accept", "application/json")
-
-	kratosUser := config.KratosUserDetails{}
-	res, err := kratosClient.R().SetResult(&kratosUser).Get("/whoami")
-	if err != nil || res.StatusCode() != http.StatusOK {
-		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosAuth)
+	kratosUser, err := ctrl.fetchUserDetailsFromKratos(c, kratosID.(string))
+	if err != nil {
+		return err
 	}
 
 	userStruct := models.User{}
@@ -135,6 +128,60 @@ func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
 	userStruct.UpdatedAt = kratosUser.Identity.UpdatedAt
 
 	err = ctrl.userModel.InsertKratosUser(userStruct)
+	if err != nil {
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosDataInsertion)
+	}
+
+	cookieExpirationTime, err := time.ParseDuration(ctrl.config.Kratos.CookieExpirationTime)
+	if err != nil {
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosCookieTime)
+	}
+
+	userCookie := &fiber.Cookie{
+		Name:    constants.KratosCookie,
+		Value:   kratosID.(string),
+		Expires: time.Now().Add(cookieExpirationTime),
+	}
+
+	c.Cookie(userCookie)
+	c.Redirect(ctrl.config.Kratos.UIUrl)
+
+	return nil
+}
+
+func (ctrl *AuthController) fetchUserDetailsFromKratos(c *fiber.Ctx, kratosID string) (config.KratosUserDetails, error) {
+	if kratosID == "" {
+		return config.KratosUserDetails{}, utils.JSONError(c, http.StatusBadRequest, constants.ErrKratosIDEmpty)
+	}
+
+	kratosClient := resty.New().SetBaseURL(ctrl.config.Kratos.BaseUrl+"/sessions").SetHeader("Cookie", fmt.Sprintf("%v=%v", constants.KratosCookie, kratosID)).SetHeader("accept", "application/json")
+
+	kratosUser := config.KratosUserDetails{}
+	res, err := kratosClient.R().SetResult(&kratosUser).Get("/whoami")
+	if err != nil || res.StatusCode() != http.StatusOK {
+		return config.KratosUserDetails{}, utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosAuth)
+	}
+
+	return kratosUser, nil
+}
+
+func (ctrl *AuthController) KratosUserUpdate(c *fiber.Ctx) error {
+	kratosID := c.Locals(constants.KratosID)
+
+	kratosUser, err := ctrl.fetchUserDetailsFromKratos(c, kratosID.(string))
+	if err != nil {
+		return err
+	}
+
+	userStruct := models.User{}
+	userStruct.KratosID = kratosUser.Identity.ID
+	userStruct.FirstName = kratosUser.Identity.Traits.Name.First
+	userStruct.LastName = kratosUser.Identity.Traits.Name.Last
+	userStruct.Email = kratosUser.Identity.Traits.Email
+	userStruct.CreatedAt = kratosUser.Identity.CreatedAt
+	userStruct.UpdatedAt = kratosUser.Identity.UpdatedAt
+
+	err = ctrl.userModel.UpdateKratosUser(userStruct)
 	if err != nil {
 		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosDataInsertion)
 	}
