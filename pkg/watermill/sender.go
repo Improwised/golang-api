@@ -53,8 +53,9 @@ func InitSender(cfg config.AppConfig) (*WatermillPubliser, error) {
 	}
 
 }
-func (wp *WatermillPubliser) PublishMessages(topic string, data []byte) error {
+func (wp *WatermillPubliser) PublishMessages(key,topic string, data []byte) error {
 	msg := message.NewMessage(watermill.NewUUID(), data)
+	msg.Metadata.Set("Key", key)
 	if err := wp.publisher.Publish(topic, msg); err != nil {
 		return err
 	}

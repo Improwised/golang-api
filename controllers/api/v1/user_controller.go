@@ -1,10 +1,14 @@
 package v1
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/gob"
 	"encoding/json"
+	"log"
 	"net/http"
 
+	"github.com/Improwised/golang-api/cli/worker"
 	"github.com/Improwised/golang-api/constants"
 	"github.com/Improwised/golang-api/models"
 	"github.com/Improwised/golang-api/pkg/events"
@@ -99,11 +103,26 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.JSONFail(c, http.StatusBadRequest, utils.ValidatorErrorString(err))
 	}
+	// -----------------------------------------------------------------------------------------
+	// send message to worker
+	var network bytes.Buffer
+	enc := gob.NewEncoder(&network)
+	var message worker.Handler
 
-	err=ctrl.pub.PublishMessages("create_user", c.Body())
+	myEvent := worker.DeleteUser{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles}
+	registerStructDynamically(myEvent)
+
+	message = myEvent
+	err = enc.Encode(&message)
+	if err != nil {
+		log.Fatal("encode: niche", err)
+	}
+
+	err = ctrl.pub.PublishMessages("worker.User", "user", network.Bytes())
 	if err != nil {
 		return utils.JSONFail(c, http.StatusBadRequest, err.Error())
 	}
+	// -----------------------------------------------------------------------------------------
 	user, err := ctrl.userService.RegisterUser(models.User{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles}, ctrl.event)
 	if err != nil {
 		ctrl.logger.Error("error while insert user", zap.Error(err))
@@ -111,4 +130,10 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 	}
 
 	return utils.JSONSuccess(c, http.StatusCreated, user)
+}
+
+func registerStructDynamically(structValue interface{}) {
+	// t := reflect.TypeOf(structValue)
+	// gob.Register(t)
+	gob.Register(structValue)
 }

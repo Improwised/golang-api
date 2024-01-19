@@ -2,7 +2,6 @@ package watermill
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/Improwised/golang-api/config"
@@ -96,9 +95,6 @@ func (ws *WatermillSubscriber) InitRouter(cfg config.AppConfig, delayTime, MaxRe
 			MaxInterval:     time.Millisecond * time.Duration(delayTime),
 			InitialInterval: time.Millisecond * time.Duration(delayTime),
 			Multiplier:      1,
-			OnRetryHook: func(retryNum int, delay time.Duration) {
-				log.Println("retry count :=", delay)
-			},
 		}.Middleware,
 
 		middleware.Recoverer,
