@@ -34,7 +34,7 @@ func (w AddUser) Handle(data []byte) {
 }
 
 func Process(msg *message.Message) error {
-	// GobRegister()
+	GobRegister()
 	buf := bytes.NewBuffer(msg.Payload)
 	dec := gob.NewDecoder(buf)
 
