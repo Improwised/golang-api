@@ -2,6 +2,7 @@ package watermill
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Improwised/golang-api/config"
@@ -18,70 +19,45 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var logger = watermill.NewStdLogger(true, false)
+var logger watermill.LoggerAdapter
 
 type WatermillSubscriber struct {
 	Subscriber message.Subscriber
 	Router     *message.Router
 }
 
-func InitWorker(cfg config.AppConfig) (*WatermillSubscriber, error) {
-	switch cfg.MQDialect {
+// TODO: for redis and kafka username/password
+// TODO: add other dialect
+func InitSubscriber(cfg config.AppConfig) (*WatermillSubscriber, error) {
+	logger = watermill.NewStdLogger(cfg.MQ.Debug, cfg.MQ.Track)
+	switch cfg.MQ.Dialect {
 	case "amqp":
-		amqpConfig := amqp.NewDurableQueueConfig(cfg.AMQB.AmqbUrl)
-		subscriber, err := amqp.NewSubscriber(
-			amqpConfig,
-			watermill.NewStdLogger(false, false),
-		)
-		return &WatermillSubscriber{Subscriber: subscriber}, err
+		return initAmqpSub(cfg)
 
 	case "redis":
-		subClient := redis.NewClient(&redis.Options{
-			Addr: cfg.Redis.RedisUrl,
-		})
-		subscriber, err := redisstream.NewSubscriber(
-			redisstream.SubscriberConfig{
-				Client:        subClient,
-				Unmarshaller:  redisstream.DefaultMarshallerUnmarshaller{},
-				ConsumerGroup: cfg.Redis.ConsumerGroup,
-			},
-			watermill.NewStdLogger(false, false),
-		)
-		return &WatermillSubscriber{Subscriber: subscriber}, err
+		return initRedisSub(cfg)
 
 	case "kafka":
-		saramaSubscriberConfig := kafka.DefaultSaramaSubscriberConfig()
-		saramaSubscriberConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
-		subscriber, err := kafka.NewSubscriber(
-			kafka.SubscriberConfig{
-				Brokers:               cfg.Kafka.KafkaBroker,
-				Unmarshaler:           kafka.DefaultMarshaler{},
-				OverwriteSaramaConfig: saramaSubscriberConfig,
-				ConsumerGroup:         cfg.Kafka.ConsumerGroup,
-			},
-			watermill.NewStdLogger(false, false),
-		)
-		if err != nil {
-			return nil, err
-		}
-		return &WatermillSubscriber{Subscriber: subscriber}, err
+		return initKafkaSub(cfg)
+
 	default:
 		return nil, nil
 	}
 }
 
+// InitRouter init router for add middleware,retry count,delay etc
 func (ws *WatermillSubscriber) InitRouter(cfg config.AppConfig, delayTime, MaxRetry int) (*WatermillSubscriber, error) {
 	router, err := message.NewRouter(message.RouterConfig{}, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	pub, err := InitSender(cfg)
+	pub, err := InitPubliser(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	poq, err := middleware.PoisonQueue(pub.publisher, "poison_queue")
+	poq, err := middleware.PoisonQueue(pub.publisher, cfg.MQ.DeadQueue)
 	if err != nil {
 		return nil, err
 	}
@@ -105,8 +81,20 @@ func (ws *WatermillSubscriber) InitRouter(cfg config.AppConfig, delayTime, MaxRe
 }
 
 func (ws *WatermillSubscriber) Run(topic string, handlerFunc message.NoPublishHandlerFunc) error {
+	if ws.Subscriber == nil {
+		return fmt.Errorf("subscriber is nil")
+	}
+
+	if ws.Router == nil {
+		router, err := message.NewRouter(message.RouterConfig{}, logger)
+		if err != nil {
+			return err
+		}
+		ws.Router = router
+	}
+	
 	ws.Router.AddNoPublisherHandler(
-		"counter",
+		"handler",
 		topic,
 		ws.Subscriber,
 		handlerFunc,
@@ -114,4 +102,48 @@ func (ws *WatermillSubscriber) Run(topic string, handlerFunc message.NoPublishHa
 
 	err := ws.Router.Run(context.Background())
 	return err
+}
+
+func initAmqpSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
+	amqpConfig := amqp.NewDurableQueueConfig(cfg.MQ.Amqp.AmqbUrl)
+	subscriber, err := amqp.NewSubscriber(
+		amqpConfig,
+		logger,
+	)
+	return &WatermillSubscriber{Subscriber: subscriber}, err
+}
+
+func initKafkaSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
+	saramaSubscriberConfig := kafka.DefaultSaramaSubscriberConfig()
+	saramaSubscriberConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	subscriber, err := kafka.NewSubscriber(
+		kafka.SubscriberConfig{
+			Brokers:               cfg.MQ.Kafka.KafkaBroker,
+			Unmarshaler:           kafka.DefaultMarshaler{},
+			OverwriteSaramaConfig: saramaSubscriberConfig,
+			ConsumerGroup:         cfg.MQ.Kafka.ConsumerGroup,
+		},
+		logger,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &WatermillSubscriber{Subscriber: subscriber}, err
+}
+
+func initRedisSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
+	subClient := redis.NewClient(&redis.Options{
+		Addr: cfg.MQ.Redis.RedisUrl,
+		// Username: ,
+		// password: ,
+	})
+	subscriber, err := redisstream.NewSubscriber(
+		redisstream.SubscriberConfig{
+			Client:        subClient,
+			Unmarshaller:  redisstream.DefaultMarshallerUnmarshaller{},
+			ConsumerGroup: cfg.MQ.Redis.ConsumerGroup,
+		},
+		logger,
+	)
+	return &WatermillSubscriber{Subscriber: subscriber}, err
 }

@@ -10,12 +10,13 @@ import (
 func Init(cfg config.AppConfig, logger *zap.Logger) error {
 	migrationCmd := GetMigrationCommandDef(cfg)
 	apiCmd := GetAPICommandDef(cfg, logger)
-
 	workerCmd:=GetWorkerCommandDef(cfg, logger)
-	workerCmd.PersistentFlags().String("topic", "demo", "Topic to subscribe")
-	workerCmd.PersistentFlags().Int("delay", 100, "time intertval to retry")
-	workerCmd.PersistentFlags().Int("retry-count", 3, "Number of retry")
+	workerCmd.PersistentFlags().Int("retry-delay", 100, "time intertval for two retry in ms")
+	workerCmd.PersistentFlags().Int("retry-count", 3, "number of retry")
+	workerCmd.PersistentFlags().String("topic", "", "topic name(queue name)")
+	
+	d:=GetDeadQueueCommandDef(cfg, logger)
 	rootCmd := &cobra.Command{Use: "golang-api"}
-	rootCmd.AddCommand(&migrationCmd, &apiCmd, &workerCmd)
+	rootCmd.AddCommand(&migrationCmd, &apiCmd, &workerCmd,&d)
 	return rootCmd.Execute()
 }
