@@ -101,11 +101,11 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 		return utils.JSONFail(c, http.StatusBadRequest, utils.ValidatorErrorString(err))
 	}
 	
-	// user, err := ctrl.userService.RegisterUser(models.User{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles}, ctrl.event)
-	// if err != nil {
-	// 	ctrl.logger.Error("error while insert user", zap.Error(err))
-	// 	return utils.JSONError(c, http.StatusInternalServerError, constants.ErrInsertUser)
-	// }
+	user, err := ctrl.userService.RegisterUser(models.User{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles}, ctrl.event)
+	if err != nil {
+		ctrl.logger.Error("error while insert user", zap.Error(err))
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrInsertUser)
+	}
 
 	// publish message to queue
 	welcomeMail := workers.WelcomeMail{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Roles: userReq.Roles}
@@ -114,5 +114,5 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 		ctrl.logger.Error("error while publish message", zap.Error(err))
 	}
 
-	return utils.JSONSuccess(c, http.StatusCreated, "user")
+	return utils.JSONSuccess(c, http.StatusCreated, user)
 }
