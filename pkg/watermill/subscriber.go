@@ -26,8 +26,7 @@ type WatermillSubscriber struct {
 	Router     *message.Router
 }
 
-// TODO: for redis and kafka username/password
-// TODO: add other dialect
+
 func InitSubscriber(cfg config.AppConfig) (*WatermillSubscriber, error) {
 	logger = watermill.NewStdLogger(cfg.MQ.Debug, cfg.MQ.Track)
 	switch cfg.MQ.Dialect {
@@ -134,8 +133,8 @@ func initKafkaSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
 func initRedisSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
 	subClient := redis.NewClient(&redis.Options{
 		Addr: cfg.MQ.Redis.RedisUrl,
-		// Username: ,
-		// password: ,
+		Username: cfg.MQ.Redis.UserName,
+		Password: cfg.MQ.Redis.Password,
 	})
 	subscriber, err := redisstream.NewSubscriber(
 		redisstream.SubscriberConfig{

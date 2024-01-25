@@ -12,6 +12,8 @@ type MQConfig struct {
 type RedisConfig struct {
 	RedisUrl      string `envconfig:"REDIS_URI"`
 	ConsumerGroup string `envconfig:"CONSUMER_GROUP"`
+	UserName 	string `envconfig:"REDIS_USERNAME"`
+	Password 	string `envconfig:"REDIS_PASSWORD"`
 }
 
 type AmqpConfig struct {

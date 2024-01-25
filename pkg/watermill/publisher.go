@@ -71,10 +71,12 @@ func initAmqpPub(cfg config.AppConfig) (*WatermillPubliser, error) {
 	return &WatermillPubliser{publisher: publisher}, err
 }
 
-// TODO: username/pass
+
 func initRedisPub(cfg config.AppConfig) (*WatermillPubliser, error) {
 	pubClient := redis.NewClient(&redis.Options{
 		Addr: cfg.MQ.Redis.RedisUrl,
+		Username: cfg.MQ.Redis.UserName,
+		Password: cfg.MQ.Redis.Password,
 	})
 	publisher, err := redisstream.NewPublisher(
 		redisstream.PublisherConfig{
