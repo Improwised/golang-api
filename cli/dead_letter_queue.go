@@ -12,7 +12,6 @@ import (
 )
 
 // GetAPICommandDef runs app
-// ? need rename in file name or command name
 func GetDeadQueueCommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 
 	workerCommand := cobra.Command{
@@ -28,18 +27,15 @@ func GetDeadQueueCommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Comm
 			}
 
 			// run worker with topic(queue name) and process function
-			if err := subscriber.Run(cfg.MQ.DeadQueue, HandleFailJob); err != nil {
-				return err
-			}
-
-			return nil
+			err = subscriber.Run(cfg.MQ.DeadQueue, HandleFailJob)
+			return err
 		},
 	}
 	return workerCommand
 }
 
 func HandleFailJob(msg *message.Message) error {
-	fmt.Println("failed job", string(msg.Payload))
+	fmt.Println("failed job:-", msg.UUID)
 	// process here
 	return nil
 }

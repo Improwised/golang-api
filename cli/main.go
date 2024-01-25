@@ -15,8 +15,8 @@ func Init(cfg config.AppConfig, logger *zap.Logger) error {
 	workerCmd.PersistentFlags().Int("retry-count", 3, "number of retry")
 	workerCmd.PersistentFlags().String("topic", "", "topic name(queue name)")
 	
-	d:=GetDeadQueueCommandDef(cfg, logger)
+	deadQueueCmd:=GetDeadQueueCommandDef(cfg, logger)
 	rootCmd := &cobra.Command{Use: "golang-api"}
-	rootCmd.AddCommand(&migrationCmd, &apiCmd, &workerCmd,&d)
+	rootCmd.AddCommand(&migrationCmd, &apiCmd, &workerCmd,&deadQueueCmd)
 	return rootCmd.Execute()
 }

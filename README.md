@@ -9,6 +9,8 @@
 
 - [Migrations](#migrations)
 
+- [Messaging queue](#messaging-queue)
+
 - [Code Walk-through](#code-walk-through)
     - [Config](#config)
     - [Command](#command)
@@ -87,8 +89,78 @@ Migrations are like **version control for your database**, allowing your team to
 - **RUN :** To run migration there is two command `make migration-up` && `make migration-down`.
 - Migration needs `-- +migrate Up` and `-- +migrate Down` respectively in starting of files, this is required because we are using [sql-migrate](https://github.com/rubenv/sql-migrate) package 
 
+### **Messaging Queue**
+- We are using [watermill](https://watermill.io/) package for messaging queue.
+- Watermill is a Golang library for working efficiently with message streams. It is intended for building event-driven applications.
 
 
+- #### Multiple Message Queue Broker Support 
+    - We are supporting 3 types of message queue broker at this time `rabbitmq`, `redis` & `kafka`
+    - It allows us to switch to message queue broker without changing too much stuff.
+    - Watermill package allows us to do that.
+    - We have environment variable `MQ_DIALECT` where you can set to message queue broker type.
+    - Need to change env accoeding to message queue broker.
+- #### Creating An Worker
+    - All of the workers for your application are stored in the `cli/workers` directory.
+    - To create a new job add a new file into the `cli/workers` directory.
+- #### Class Structure
+    - Workers class are very simple, consisting of a single method `Handle`. `Handle` executes when a message is received.
+    - The `Handle()` method should return an `error` if the job fails.
+        ```go
+        type WelcomeMail struct {
+            FirstName string
+            LastName  string
+            Email     string
+            Roles     string
+        }
+        // Handle executes the job.
+        func (w WelcomeMail) Handle() error {
+            return nil
+        }
+        ```
+    - Command to run worker
+        ```go
+        go run app.go worker --retry-delay 400 --retry-count 3 --topic user 
+        // --retry-delay 400 --retry-count 3 are optional
+        // --retry-delay 400 means it will retry after 400ms
+        // --retry-count 3 means it will retry 3 times
+        ```
+- #### Register Worker
+    - After creating the struct, you need to register it in `cli/workers/worker_handler.go`, so that it can be called correctly.
+    - To register a new worker add struct to `RegisterWorkerStruct` function.
+        ```go
+        func RegisterWorkerStruct() []interface{} {
+            return []interface{}{
+                WelcomeMail{},
+                // ...
+            }
+        }
+        ```
+- #### Publish Message
+    - The `InitPubliser` function initializes a `WatermillPubliser` based on the provided configuration.
+        ```go
+        pub, err := watermill.InitPubliser(cfg)
+        if err != nil {
+            // Handle error
+        }
+        ```
+    - The `Publish` method on `WatermillPubliser` is used to publish a message to a specific topic(queue name). The message is encoded using the Go `encoding/gob` package before being sent.
+        ```go
+        // Worker struct must be registered before publishing
+        err := pub.Publish(topic, workerStruct)
+        if err != nil {
+            // Handle error
+        }
+        ```
+- #### Dead Letter Queue
+    - The `dead letter queue`, also known as the `poison queue` in watermill, is a designated destination for messages that have failed to undergo processing by a consumer.
+    - The name of this queue is specified in the `DEAD_LETTER_QUEUE` environment variable.
+    - Command to run dead letter queue 
+        ```go
+        go run app.go dead-letter-queue
+        ```
+
+---    
 ### **Code Walk-through**
 - #### Config:
     - We are using [envconfig](https://github.com/kelseyhightower/envconfig) which binds env values to struct elements.
@@ -165,7 +237,7 @@ Migrations are like **version control for your database**, allowing your team to
     - Each controller must have their struct which contains model object, that will be use to call function of models.
 - #### Utils:
     - We have define some common methods inside `utils` like json response.
-    - We need common function which handles json response that's why we have created (json_response.go)[utils/json_response.go]
+    - We need common function which handles json response that's why we have created [json_response.go](utils/json_response.go)
     - Similarly we have created different files for different use in utils.
 ---
 ### **Testcases**

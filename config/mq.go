@@ -1,6 +1,5 @@
 package config
 
-// TODO: add env to .env.example
 type MQConfig struct {
 	Dialect   string `envconfig:"MQ_DIALECT"`
 	Debug     bool   `envconfig:"MQ_DEBUG"`

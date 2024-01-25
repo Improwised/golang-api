@@ -8,13 +8,13 @@ import (
 )
 
 func init() {
-	for _, v := range ListStruct() {
+	for _, v := range RegisterWorkerStruct() {
 		gob.Register(v)
 	}
 }
 
 // Register all worker struct here befour run worker for proper unmarshalling
-func ListStruct() []interface{} {
+func RegisterWorkerStruct() []interface{} {
 	return []interface{}{
 		WelcomeMail{},
 		// ...

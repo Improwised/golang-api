@@ -34,7 +34,7 @@ func GetWorkerCommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command
 				return err
 			}
 
-			// Init worker
+			// Init subscriber
 			subscriber, err := watermill.InitSubscriber(cfg)
 			if err != nil {
 				return err

@@ -107,12 +107,12 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrInsertUser)
 	}
 	
-	// publish job to queue
-	myEvent := workers.WelcomeMail{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Roles: userReq.Roles}
-	err = ctrl.pub.Publish("user", myEvent)
+	// publish message to queue
+	welcomeMail := workers.WelcomeMail{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Roles: userReq.Roles}
+	err = ctrl.pub.Publish("user", welcomeMail)
 	if err != nil {
-		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrInsertUser)
+		ctrl.logger.Error("error while publish message", zap.Error(err))
 	}
-	
+
 	return utils.JSONSuccess(c, http.StatusCreated, user)
 }

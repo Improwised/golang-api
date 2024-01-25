@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"log"
 
 	"github.com/Improwised/golang-api/cli/workers"
 	"github.com/Improwised/golang-api/config"
@@ -39,29 +38,31 @@ func InitPubliser(cfg config.AppConfig) (*WatermillPubliser, error) {
 
 }
 
-// send message to queue using topic name
+// send message into queue using topic name
 //
 // struct must from worker package(/cli/workers)
-func (wp *WatermillPubliser) Publish(topic string, data interface{}) error {
+func (wp *WatermillPubliser) Publish(topic string, inputStruct interface{}) error {
+	// if broker is not set then return nil
+	if wp.publisher == nil {
+		return nil
+	}
 	var network bytes.Buffer
 	enc := gob.NewEncoder(&network)
 	var handle workers.Handler
 
-	handle, ok := data.(workers.Handler)
+	handle, ok := inputStruct.(workers.Handler)
 	if !ok {
-		return fmt.Errorf("data is not of type workers.Handler")
+		return fmt.Errorf("struct is not of type workers.Handler")
 	}
 
 	err := enc.Encode(&handle)
 	if err != nil {
-		log.Fatal("encode: niche", err)
-	}
-	msg := message.NewMessage(watermill.NewUUID(), network.Bytes())
-
-	if err := wp.publisher.Publish(topic, msg); err != nil {
 		return err
 	}
-	return nil
+
+	msg := message.NewMessage(watermill.NewUUID(), network.Bytes())
+	err = wp.publisher.Publish(topic, msg)
+	return err
 }
 
 func initAmqpPub(cfg config.AppConfig) (*WatermillPubliser, error) {
