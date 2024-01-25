@@ -16,12 +16,12 @@ type WelcomeMail struct {
 func (w WelcomeMail) Handle() error {
 	log.Println("sending mail")
 
-	smtp := helpers.NewSMTPHelper("sandbox.smtp.mailtrap.io", "2525", "7628fa366c0257c", "2afb7200812272")
+	smtp := helpers.NewSMTPHelper("localhost", "2525", "root", "pass")
 	smtp.SetSubject("welocme")
 	smtp.SetPlainBody([]byte("welcome to our org"))
 
-	smtp.SetSender("chintansakhiya00001@gmail.com")
-	smtp.SetReceivers([]string{"chintansakhiya00001@gmail.com"})
+	smtp.SetSender("support@improwised.com")
+	smtp.SetReceivers([]string{w.Email})
 
 	if err := smtp.SendMail(); err != nil {
 		return err
