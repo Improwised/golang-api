@@ -106,7 +106,7 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 		ctrl.logger.Error("error while insert user", zap.Error(err))
 		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrInsertUser)
 	}
-	
+
 	// publish message to queue
 	welcomeMail := workers.WelcomeMail{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Roles: userReq.Roles}
 	err = ctrl.pub.Publish("user", welcomeMail)

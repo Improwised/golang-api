@@ -97,4 +97,3 @@ func initKafkaPub(cfg config.AppConfig) (*WatermillPubliser, error) {
 	)
 	return &WatermillPubliser{publisher: publisher}, err
 }
-

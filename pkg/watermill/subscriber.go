@@ -92,7 +92,7 @@ func (ws *WatermillSubscriber) Run(topic string, handlerFunc message.NoPublishHa
 		}
 		ws.Router = router
 	}
-	
+
 	ws.Router.AddNoPublisherHandler(
 		"handler",
 		topic,
