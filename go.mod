@@ -1,8 +1,6 @@
 module github.com/Improwised/golang-api
 
-go 1.21
-
-toolchain go1.21.5
+go 1.19
 
 require (
 	clevergo.tech/jsend v1.1.3
