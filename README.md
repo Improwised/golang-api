@@ -118,13 +118,6 @@ Migrations are like **version control for your database**, allowing your team to
             return nil
         }
         ```
-    - Command to run worker
-        ```go
-        go run app.go worker --retry-delay 400 --retry-count 3 --topic user 
-        // --retry-delay 400 --retry-count 3 are optional
-        // --retry-delay 400 means it will retry after 400ms
-        // --retry-count 3 means it will retry 3 times
-        ```
 - #### Register Worker
     - After creating the struct, you need to register it in `cli/workers/worker_handler.go`, so that it can be called correctly.
     - To register a new worker add struct to `RegisterWorkerStruct` function.
@@ -136,6 +129,15 @@ Migrations are like **version control for your database**, allowing your team to
             }
         }
         ```
+ - #### Command to run worker
+    ```go
+    go run app.go worker --retry-delay 400 --retry-count 3 --topic user 
+    // --retry-delay 400 --retry-count 3 are optional
+    // --retry-delay 400 means it will retry after 400ms
+    // --retry-count 3 means it will retry 3 times
+
+    ```
+
 - #### Publish Message
     - The `InitPubliser` function initializes a `WatermillPubliser` based on the provided configuration.
         ```go
