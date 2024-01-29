@@ -95,7 +95,7 @@ Migrations are like **version control for your database**, allowing your team to
 
 
 - #### Multiple Message Queue Broker Support 
-    - We are supporting 3 types of message queue broker at this time `rabbitmq`, `redis` & `kafka`
+    - We are supporting 4 types of message queue broker at this time `rabbitmq`, `redis`, `googleCloud` & `kafka`
     - It allows us to switch to message queue broker without changing too much stuff.
     - Watermill package allows us to do that.
     - We have environment variable `MQ_DIALECT` where you can set to message queue broker type.

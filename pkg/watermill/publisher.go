@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"time"
 
 	"github.com/Improwised/golang-api/cli/workers"
 	"github.com/Improwised/golang-api/config"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-amqp/v2/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
 
 	"github.com/ThreeDotsLabs/watermill-kafka/v2/pkg/kafka"
 	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
@@ -32,6 +34,8 @@ func InitPubliser(cfg config.AppConfig) (*WatermillPubliser, error) {
 	case "kafka":
 		return initKafkaPub(cfg)
 
+	case "googlecloud":
+		return initGoogleCloudPub(cfg)
 	default:
 		return &WatermillPubliser{}, nil
 	}
@@ -74,7 +78,7 @@ func initAmqpPub(cfg config.AppConfig) (*WatermillPubliser, error) {
 
 func initRedisPub(cfg config.AppConfig) (*WatermillPubliser, error) {
 	pubClient := redis.NewClient(&redis.Options{
-		Addr: cfg.MQ.Redis.RedisUrl,
+		Addr:     cfg.MQ.Redis.RedisUrl,
 		Username: cfg.MQ.Redis.UserName,
 		Password: cfg.MQ.Redis.Password,
 	})
@@ -97,5 +101,16 @@ func initKafkaPub(cfg config.AppConfig) (*WatermillPubliser, error) {
 		},
 		logger,
 	)
+	return &WatermillPubliser{publisher: publisher}, err
+}
+
+func initGoogleCloudPub(cfg config.AppConfig) (*WatermillPubliser, error) {
+	publisher, err := googlecloud.NewPublisher(googlecloud.PublisherConfig{
+		ProjectID:      cfg.MQ.GoogleCloud.ProjectID,
+		ConnectTimeout: 10 * time.Second,
+		PublishTimeout: 10 * time.Second,
+		Marshaler: googlecloud.DefaultMarshalerUnmarshaler{},
+	}, logger)
+
 	return &WatermillPubliser{publisher: publisher}, err
 }

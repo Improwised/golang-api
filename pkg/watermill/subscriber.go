@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"time"
 
+	"cloud.google.com/go/pubsub"
 	"github.com/Improwised/golang-api/config"
 
 	"github.com/Shopify/sarama"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-amqp/pkg/amqp"
 
+	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
 	"github.com/ThreeDotsLabs/watermill-kafka/v2/pkg/kafka"
 	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -26,7 +28,6 @@ type WatermillSubscriber struct {
 	Router     *message.Router
 }
 
-
 func InitSubscriber(cfg config.AppConfig) (*WatermillSubscriber, error) {
 	logger = watermill.NewStdLogger(cfg.MQ.Debug, cfg.MQ.Track)
 	switch cfg.MQ.Dialect {
@@ -38,6 +39,9 @@ func InitSubscriber(cfg config.AppConfig) (*WatermillSubscriber, error) {
 
 	case "kafka":
 		return initKafkaSub(cfg)
+
+	case "googlecloud":
+		return initGoogleCloudSub(cfg)
 
 	default:
 		return nil, nil
@@ -132,7 +136,7 @@ func initKafkaSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
 
 func initRedisSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
 	subClient := redis.NewClient(&redis.Options{
-		Addr: cfg.MQ.Redis.RedisUrl,
+		Addr:     cfg.MQ.Redis.RedisUrl,
 		Username: cfg.MQ.Redis.UserName,
 		Password: cfg.MQ.Redis.Password,
 	})
@@ -144,5 +148,34 @@ func initRedisSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
 		},
 		logger,
 	)
+	return &WatermillSubscriber{Subscriber: subscriber}, err
+}
+
+func initGoogleCloudSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
+	subscriptionName := func(string) string {
+		return cfg.MQ.GoogleCloud.SubscriptionId
+	}
+	ackDeadline := 20 * time.Second
+	subscriber, err := googlecloud.NewSubscriber(
+		googlecloud.SubscriberConfig{
+			ProjectID:                        cfg.MQ.GoogleCloud.ProjectID,
+			DoNotCreateTopicIfMissing:        false,
+			DoNotCreateSubscriptionIfMissing: false,
+			InitializeTimeout:                30 * time.Second,
+			GenerateSubscriptionName:         subscriptionName,
+			SubscriptionConfig: pubsub.SubscriptionConfig{
+				RetainAckedMessages:   false,
+				EnableMessageOrdering: false,
+				AckDeadline:           ackDeadline,
+				RetentionDuration:     24 * time.Hour,
+			},
+			Unmarshaler: googlecloud.DefaultMarshalerUnmarshaler{},
+		},
+		logger,
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	return &WatermillSubscriber{Subscriber: subscriber}, err
 }
