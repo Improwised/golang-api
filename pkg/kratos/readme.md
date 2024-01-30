@@ -37,6 +37,15 @@ For configuring kratos according to the requirements you'll have to update file 
 
     - There is an endpoint(`/kratos/auth) for Kratos authentication in this boilerplate, inside your Kratos configuration, after registration and login hook you have to specify this endpoint URL. For more see the [here](#how-kratos-integration-works).
 
+    - For adding support of different oidc providers for social sign-in, You first need to add the jsonnet file inside `/pkg/kratos/oidc` folder. You can find the corresponding jsonnets and details [here](https://www.ory.sh/docs/kratos/social-signin/generic).
+
+    - Base64 this jsonnet schema using below command and then replace it inside the `kratos.yml` configuration.
+        - ```bash 
+             base64 -w 0 <provider>.schema.jsonnet
+            ```
+        - As an example, There is Google provider already enabled.
+    - After this use this value in `mapper_url` in the `kratos.yml` configuration.
+    - You will also need to have the cliendId, secrets and other details of the specific provider before using it.
 3. For Kratos schema configuration you have to edit the ```identity.schema.json```. This will change the user schema.
     
     - Use this in case you want specific details in the registration form to get it from the user.
