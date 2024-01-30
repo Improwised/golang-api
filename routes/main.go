@@ -20,7 +20,7 @@ import (
 var mu sync.Mutex
 
 // Setup func
-func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, events *events.Events, pMetrics *pMetrics.PrometheusMetrics, pub *watermill.WatermillPubliser) error {
+func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, events *events.Events, pMetrics *pMetrics.PrometheusMetrics, pub *watermill.WatermillPublisher) error {
 	mu.Lock()
 
 	app.Use(middlewares.LogHandler(logger, pMetrics))
@@ -69,7 +69,7 @@ func setupAuthController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logge
 	return nil
 }
 
-func setupUserController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logger, middlewares middlewares.Middleware, events *events.Events, pub *watermill.WatermillPubliser) error {
+func setupUserController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logger, middlewares middlewares.Middleware, events *events.Events, pub *watermill.WatermillPublisher) error {
 	userController, err := controller.NewUserController(goqu, logger, events, pub)
 	if err != nil {
 		return err

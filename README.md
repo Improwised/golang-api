@@ -95,7 +95,7 @@ Migrations are like **version control for your database**, allowing your team to
 
 
 - #### Multiple Message Queue Broker Support 
-    - We are supporting 4 types of message queue broker at this time `rabbitmq`, `redis`, `googleCloud` & `kafka`
+    - We are supporting 5 types of message queue broker at this time `rabbitmq`, `redis`, `googleCloud`,`sql(postges,mysql)` & `kafka`
     - It allows us to switch to message queue broker without changing too much stuff.
     - Watermill package allows us to do that.
     - We have environment variable `MQ_DIALECT` where you can set to message queue broker type.
@@ -156,7 +156,7 @@ Migrations are like **version control for your database**, allowing your team to
         ```
 - #### Dead Letter Queue
     - The `dead letter queue`, also known as the `poison queue` in watermill, is a designated destination for messages that have failed to undergo processing by a consumer.
-    - The name of this queue is specified in the `DEAD_LETTER_QUEUE` environment variable.
+    - The name of this queue is specified in the `DEAD_LETTER_QUEUE` environment variable, we are storing failed job into database.
     - Command to run dead letter queue 
         ```go
         go run app.go dead-letter-queue

@@ -25,11 +25,11 @@ type UserController struct {
 	userService *services.UserService
 	logger      *zap.Logger
 	event       *events.Events
-	pub         *watermill.WatermillPubliser
+	pub         *watermill.WatermillPublisher
 }
 
 // NewUserController returns a user
-func NewUserController(goqu *goqu.Database, logger *zap.Logger, event *events.Events, pub *watermill.WatermillPubliser) (*UserController, error) {
+func NewUserController(goqu *goqu.Database, logger *zap.Logger, event *events.Events, pub *watermill.WatermillPublisher) (*UserController, error) {
 	userModel, err := models.InitUserModel(goqu)
 	if err != nil {
 		return nil, err

@@ -7,10 +7,12 @@ import (
 
 	"cloud.google.com/go/pubsub"
 	"github.com/Improwised/golang-api/config"
+	"github.com/Improwised/golang-api/database"
 
 	"github.com/Shopify/sarama"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-amqp/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill-sql/v2/pkg/sql"
 
 	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
 	"github.com/ThreeDotsLabs/watermill-kafka/v2/pkg/kafka"
@@ -28,8 +30,11 @@ type WatermillSubscriber struct {
 	Router     *message.Router
 }
 
-func InitSubscriber(cfg config.AppConfig) (*WatermillSubscriber, error) {
+func InitSubscriber(cfg config.AppConfig, isDeadLetterQ bool) (*WatermillSubscriber, error) {
 	logger = watermill.NewStdLogger(cfg.MQ.Debug, cfg.MQ.Track)
+	if isDeadLetterQ {
+		return initSqlSub(cfg)
+	}
 	switch cfg.MQ.Dialect {
 	case "amqp":
 		return initAmqpSub(cfg)
@@ -43,6 +48,8 @@ func InitSubscriber(cfg config.AppConfig) (*WatermillSubscriber, error) {
 	case "googlecloud":
 		return initGoogleCloudSub(cfg)
 
+	case "sql":
+		return initSqlSub(cfg)
 	default:
 		return nil, nil
 	}
@@ -55,12 +62,12 @@ func (ws *WatermillSubscriber) InitRouter(cfg config.AppConfig, delayTime, MaxRe
 		return nil, err
 	}
 
-	pub, err := InitPubliser(cfg)
+	pub, err := InitPublisher(cfg, true)
 	if err != nil {
 		return nil, err
 	}
 
-	poq, err := middleware.PoisonQueue(pub.publisher, cfg.MQ.DeadQueue)
+	poq, err := middleware.PoisonQueue(pub.publisher, cfg.MQ.DeadLetterQ)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +90,7 @@ func (ws *WatermillSubscriber) InitRouter(cfg config.AppConfig, delayTime, MaxRe
 	return ws, nil
 }
 
-func (ws *WatermillSubscriber) Run(topic string, handlerFunc message.NoPublishHandlerFunc) error {
+func (ws *WatermillSubscriber) Run(topic,handlerName string ,handlerFunc message.NoPublishHandlerFunc) error {
 	if ws.Subscriber == nil {
 		return fmt.Errorf("subscriber is nil")
 	}
@@ -97,7 +104,7 @@ func (ws *WatermillSubscriber) Run(topic string, handlerFunc message.NoPublishHa
 	}
 
 	ws.Router.AddNoPublisherHandler(
-		"handler",
+		handlerName,
 		topic,
 		ws.Subscriber,
 		handlerFunc,
@@ -175,6 +182,60 @@ func initGoogleCloudSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
 	)
 	if err != nil {
 		panic(err)
+	}
+
+	return &WatermillSubscriber{Subscriber: subscriber}, err
+}
+
+func initSqlSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
+	switch cfg.MQ.Sql.Dialect {
+	case "postgres":
+		return initPostgresSub(cfg)
+
+	case "mysql":
+		return initMysqlSub(cfg)
+
+	default:
+		return nil, nil
+	}
+}
+
+func initPostgresSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
+	db, err := database.PostgresDBConnection(cfg.MQ.Sql)
+	if err != nil {
+		return nil, err
+	}
+	subscriber, err := sql.NewSubscriber(
+		db,
+		sql.SubscriberConfig{
+			SchemaAdapter:    database.PostgreSQLSchema{},
+			OffsetsAdapter:   sql.DefaultPostgreSQLOffsetsAdapter{},
+			InitializeSchema: true,
+		},
+		logger,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &WatermillSubscriber{Subscriber: subscriber}, err
+}
+
+func initMysqlSub(cfg config.AppConfig) (*WatermillSubscriber, error) {
+	db, err := database.MysqlDBConnection(cfg.MQ.Sql)
+	if err != nil {
+		return nil, err
+	}
+	subscriber, err := sql.NewSubscriber(
+		db,
+		sql.SubscriberConfig{
+			SchemaAdapter:    database.MySQLSchema{},
+			OffsetsAdapter:   sql.DefaultMySQLOffsetsAdapter{},
+			InitializeSchema: true,
+		},
+		logger,
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	return &WatermillSubscriber{Subscriber: subscriber}, err

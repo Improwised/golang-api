@@ -18,7 +18,7 @@ func GetWorkerCommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command
 		Short: "To start worker",
 		Long:  `To start worker`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Get details name from flag
+			// Get details from flag
 			topic, err := cmd.Flags().GetString("topic")
 			if err != nil {
 				return err
@@ -35,7 +35,7 @@ func GetWorkerCommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command
 			}
 
 			// Init subscriber
-			subscriber, err := watermill.InitSubscriber(cfg)
+			subscriber, err := watermill.InitSubscriber(cfg, false)
 			if err != nil {
 				return err
 			}
@@ -47,7 +47,7 @@ func GetWorkerCommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command
 			}
 
 			// run worker with topic(queue name) and process function
-			err = router.Run(topic, workers.Process)
+			err = router.Run(topic, cfg.MQ.HandlerName, workers.Process)
 			return err
 
 		},

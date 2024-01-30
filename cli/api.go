@@ -44,7 +44,7 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 				return err
 			}
 
-			pub, err := watermill.InitPubliser(cfg)
+			pub, err := watermill.InitPublisher(cfg,false)
 			if err != nil {
 				return err
 			}

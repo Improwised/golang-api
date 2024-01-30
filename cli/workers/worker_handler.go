@@ -3,6 +3,7 @@ package workers
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 )
@@ -33,6 +34,11 @@ func Process(msg *message.Message) error {
 
 	var result Handler
 	err := dec.Decode(&result)
+	if err != nil {
+		return err
+	}
+	// Store the JSON payload in the msg so that it can be persisted in the database in case the job fails.
+	msg.Payload, err = json.Marshal(result)
 	if err != nil {
 		return err
 	}
