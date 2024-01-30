@@ -46,6 +46,8 @@ For configuring kratos according to the requirements you'll have to update file 
         - As an example, There is Google provider already enabled.
     - After this use this value in `mapper_url` in the `kratos.yml` configuration.
     - You will also need to have the cliendId, secrets and other details of the specific provider before using it.
+    - For setting up OAuth 2.O using Google see the steps [here](https://support.google.com/cloud/answer/6158849?hl=en).
+
 3. For Kratos schema configuration you have to edit the ```identity.schema.json```. This will change the user schema.
     
     - Use this in case you want specific details in the registration form to get it from the user.
