@@ -26,7 +26,8 @@ require (
 	github.com/lestrrat-go/jwx/v2 v2.0.11
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.17
-	github.com/prometheus/client_golang v1.16.0
+	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.18.0
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/rs/xid v1.5.0
 	github.com/rubenv/sql-migrate v1.5.2
@@ -39,7 +40,21 @@ require (
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
 
-require golang.org/x/sync v0.6.0 // indirect
+require (
+	github.com/oklog/ulid v1.3.1 // indirect
+	github.com/pierrec/lz4/v4 v4.1.17 // indirect
+	github.com/rabbitmq/amqp091-go v1.9.0 // indirect
+	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
+	golang.org/x/oauth2 v0.16.0 // indirect
+	golang.org/x/sync v0.6.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
+	google.golang.org/api v0.157.0 // indirect
+	google.golang.org/appengine v1.6.8 // indirect
+	google.golang.org/genproto v0.0.0-20240116215550-a9fa1716bcac // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240122161410-6c6643bf1457 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240116215550-a9fa1716bcac // indirect
+	google.golang.org/grpc v1.60.1 // indirect
+)
 
 require (
 	cloud.google.com/go v0.112.0 // indirect
@@ -92,16 +107,11 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
-	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/pierrec/lz4/v4 v4.1.17 // indirect
-	github.com/pkg/errors v0.9.1
+	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.42.0 // indirect
-	github.com/prometheus/procfs v0.10.1 // indirect
-	github.com/rabbitmq/amqp091-go v1.9.0 // indirect
-	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
+	github.com/prometheus/client_model v0.5.0 // indirect
+	github.com/prometheus/common v0.45.0 // indirect
+	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/sony/gobreaker v0.5.0 // indirect
@@ -123,16 +133,8 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/oauth2 v0.16.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/api v0.157.0 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto v0.0.0-20240116215550-a9fa1716bcac // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240122161410-6c6643bf1457 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240116215550-a9fa1716bcac // indirect
-	google.golang.org/grpc v1.60.1 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
