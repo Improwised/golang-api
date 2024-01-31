@@ -95,6 +95,14 @@ Ory Kratos doesn't provide UI, You have to specify the endpoints for different U
 3. Build image using ```docker build -t golang-api .```
 4. Run ```docker run golang-api``` to run the container.
 
+**Another Way:**
+- For starting All services including kratos, runinng databse migrations and starting up golang server all together, run the script `local.sh` inside `/pkg/kratos`.
+    ```bash
+    cd pkg/kratos
+    ./local.sh
+    ```
+**Note:** Use this for local development environment.
+
 ### **Migrations**
 - **CREATE :** To create migrations i have discribed details in [Kick Start Commands](#kick-start-commands) section.
 - **RUN :** To run migration there is two command `make migration-up` && `make migration-down`.
