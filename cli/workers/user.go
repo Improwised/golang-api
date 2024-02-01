@@ -49,8 +49,8 @@ func (l LoginMail) Handle() error {
 	m.SetHeader("Subject", "Login")
 	m.SetBody("text/html", "login from "+l.Device)
 
-	d:=gomail.NewDialer("smtp.mailtrap.io", 2525, "7628fa366c0257", "2afb7200812272")
-	// Send the email to Bob, Cora and Dan.
+	d:=gomail.NewDialer("localhost", 2525, "user", "password")
+	// Send the email
 	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
