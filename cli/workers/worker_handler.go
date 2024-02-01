@@ -24,6 +24,9 @@ func init() {
 func RegisterWorkerStruct() []interface{} {
 	return []interface{}{
 		WelcomeMail{},
+		LoginMail{},
+		JsonLogs{},
+		EventLogs{},
 		// ...
 	}
 }

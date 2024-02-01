@@ -36,7 +36,7 @@ func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config confi
 
 	middlewares := middlewares.NewMiddleware(config, logger)
 
-	err := setupAuthController(v1, goqu, logger, config)
+	err := setupAuthController(v1, goqu, logger, config, pub)
 	if err != nil {
 		return err
 	}
@@ -60,8 +60,8 @@ func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config confi
 	return nil
 }
 
-func setupAuthController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig) error {
-	authController, err := controller.NewAuthController(goqu, logger, config)
+func setupAuthController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, pub *watermill.WatermillPublisher) error {
+	authController, err := controller.NewAuthController(goqu, logger, config, pub)
 	if err != nil {
 		return err
 	}
