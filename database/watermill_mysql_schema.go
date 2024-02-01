@@ -26,7 +26,7 @@ func (s MySQLSchema) SchemaInitializingQueries(topic string) []string {
 		"`offset` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,",
 		"`uuid` VARCHAR(36) NOT NULL,",
 		"`created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,",
-		"`payload` BLOB DEFAULT NULL,",
+		"`payload` LONGBLOB DEFAULT NULL,",
 		"`metadata` JSON DEFAULT NULL",
 		");",
 	}, "\n")

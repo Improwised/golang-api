@@ -3,7 +3,6 @@ package watermill
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"time"
 
 	"github.com/Improwised/golang-api/cli/workers"
@@ -23,8 +22,8 @@ import (
 type WatermillPublisher struct {
 	publisher message.Publisher
 }
-// ? single database or mualtipal database
-func InitPublisher(cfg config.AppConfig,isDeadLetterQ bool) (*WatermillPublisher, error) {
+
+func InitPublisher(cfg config.AppConfig, isDeadLetterQ bool) (*WatermillPublisher, error) {
 	logger = watermill.NewStdLogger(cfg.MQ.Debug, cfg.MQ.Track)
 	if isDeadLetterQ {
 		return initSqlPub(cfg)
@@ -53,19 +52,13 @@ func InitPublisher(cfg config.AppConfig,isDeadLetterQ bool) (*WatermillPublisher
 // send message into queue using topic name
 //
 // struct must from worker package(/cli/workers)
-func (wp *WatermillPublisher) Publish(topic string, inputStruct interface{}) error {
+func (wp *WatermillPublisher) Publish(topic string, handle workers.Handler) error {
 	// if broker is not set then return nil
 	if wp.publisher == nil {
 		return nil
 	}
 	var network bytes.Buffer
 	enc := gob.NewEncoder(&network)
-	var handle workers.Handler
-
-	handle, ok := inputStruct.(workers.Handler)
-	if !ok {
-		return fmt.Errorf("struct is not of type workers.Handler")
-	}
 
 	err := enc.Encode(&handle)
 	if err != nil {
@@ -82,7 +75,6 @@ func initAmqpPub(cfg config.AppConfig) (*WatermillPublisher, error) {
 	publisher, err := amqp.NewPublisher(amqpConfig, logger)
 	return &WatermillPublisher{publisher: publisher}, err
 }
-
 
 func initRedisPub(cfg config.AppConfig) (*WatermillPublisher, error) {
 	pubClient := redis.NewClient(&redis.Options{

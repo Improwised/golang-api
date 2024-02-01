@@ -47,7 +47,6 @@ func GetWorkerCommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command
 			}
 
 			// run worker with topic(queue name) and process function
-			workers := &workers.QConfig{Topic: topic,MaxRetries: retryCount,}
 			err = router.Run(topic, cfg.MQ.HandlerName, workers.Process)
 			return err
 
