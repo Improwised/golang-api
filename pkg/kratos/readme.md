@@ -33,9 +33,11 @@ For configuring kratos according to the requirements you'll have to update file 
             ```SOME_NESTED_KEY_AND_ARRAY_1_ID=bar```
 
             In the case of Array, you'll have to specify it with indexing and with key value, if there are no key values just keep indexing. For more see the [documentation](https://www.ory.sh/docs/ecosystem/configuring#loading-configuration-from-environment-variables).
-    - For adding new fields to the Kratos config, you'll need to add it to the `kratos.yml` file and mention it in the `.env`` file. For a list of supported configurations, visit the [documentation](https://www.ory.sh/docs/kratos/reference/configuration)
+    - For adding new fields to the Kratos config, you'll need to add it to the `kratos.yml` file and mention it in the ```.env``` file. For a list of supported configurations, visit the [documentation](https://www.ory.sh/docs/kratos/reference/configuration)
 
-    - There is an endpoint(`/kratos/auth) for Kratos authentication in this boilerplate, inside your Kratos configuration, after registration and login hook you have to specify this endpoint URL. For more see the [here](#how-kratos-integration-works).
+    - There is an endpoint(`/kratos/auth`) for Kratos authentication in this boilerplate, inside your Kratos configuration, after registration and login hook you have to specify this endpoint URL. For more see the [here](#how-kratos-integration-works).
+    
+    - Same way there is an endpoint(`/kratos/update-user`)  for syncing user details between kratos and database on user details update from kratos.   
 
     - For adding support of different oidc providers for social sign-in, You first need to add the jsonnet file inside `/pkg/kratos/oidc` folder. You can find the corresponding jsonnets and details [here](https://www.ory.sh/docs/kratos/social-signin/generic).
 
