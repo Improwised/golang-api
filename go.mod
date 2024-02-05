@@ -31,7 +31,7 @@ require (
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/rs/xid v1.5.0
 	github.com/rubenv/sql-migrate v1.5.2
-	github.com/samber/lo v1.38.1
+	github.com/samber/lo v1.39.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
