@@ -151,3 +151,19 @@ func (model *UserModel) GetUserByEmailAndPassword(email string, password string)
 func (model *UserModel) CountUsers() (int64, error) {
 	return model.db.From(UserTable).Count()
 }
+
+func (model *UserModel) UpdateKratosUser(user User) error {
+	_, err := model.db.Update(UserTable).Set(goqu.Record{
+		"kratos_id":  user.KratosID,
+		"first_name": user.FirstName,
+		"last_name":  user.LastName,
+		"email":      user.Email,
+		"created_at": user.CreatedAt,
+		"updated_at": user.UpdatedAt,
+	}).Where(goqu.C("kratos_id").Eq(user.KratosID)).Executor().Exec()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
