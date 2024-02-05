@@ -34,8 +34,8 @@ selfservice:
             auth_url: https://accounts.google.com/o/oauth2/v2/auth
             token_url: https://www.googleapis.com/oauth2/v4/token
             issuer_url: https://accounts.google.com
-            client_id: $GOOGLE_CLIENT_ID
-            client_secret: $GOOGLE_CLIENT_SECRET
+            client_id: <GOOGLE_CLIENT_ID>
+            client_secret: <GOOGLE_CLIENT_SECRET>
             scope:
               - openid
               - email
@@ -59,8 +59,11 @@ selfservice:
       ui_url: http://127.0.0.1:4455/settings
       privileged_session_max_age: 15m
       required_aal: highest_available
+<<<<<<< HEAD
       after:
         default_browser_return_url: http://127.0.0.1:3000/api/v1/kratos/update-user
+=======
+>>>>>>> main
 
     recovery:
       enabled: true

@@ -10,6 +10,7 @@ import (
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
 	"github.com/Improwised/golang-api/pkg/events"
+	"github.com/Improwised/golang-api/pkg/watermill"
 	"github.com/Improwised/golang-api/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
@@ -43,8 +44,12 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 				return err
 			}
 
+			pub, err := watermill.InitPublisher(cfg,false)
+			if err != nil {
+				return err
+			}
 			// setup routes
-			err = routes.Setup(app, db, logger, cfg, events, promMetrics)
+			err = routes.Setup(app, db, logger, cfg, events, promMetrics, pub)
 			if err != nil {
 				return err
 			}

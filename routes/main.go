@@ -12,6 +12,7 @@ import (
 	"github.com/Improwised/golang-api/middlewares"
 	"github.com/Improwised/golang-api/pkg/events"
 	pMetrics "github.com/Improwised/golang-api/pkg/prometheus"
+	"github.com/Improwised/golang-api/pkg/watermill"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,7 +20,7 @@ import (
 var mu sync.Mutex
 
 // Setup func
-func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, events *events.Events, pMetrics *pMetrics.PrometheusMetrics) error {
+func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, events *events.Events, pMetrics *pMetrics.PrometheusMetrics, pub *watermill.WatermillPublisher) error {
 	mu.Lock()
 
 	app.Use(middlewares.LogHandler(logger, pMetrics))
@@ -40,7 +41,7 @@ func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config confi
 		return err
 	}
 
-	err = setupUserController(v1, goqu, logger, middlewares, events)
+	err = setupUserController(v1, goqu, logger, middlewares, events, pub)
 	if err != nil {
 		return err
 	}
@@ -76,8 +77,8 @@ func setupAuthController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logge
 	return nil
 }
 
-func setupUserController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logger, middlewares middlewares.Middleware, events *events.Events) error {
-	userController, err := controller.NewUserController(goqu, logger, events)
+func setupUserController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logger, middlewares middlewares.Middleware, events *events.Events, pub *watermill.WatermillPublisher) error {
+	userController, err := controller.NewUserController(goqu, logger, events, pub)
 	if err != nil {
 		return err
 	}
