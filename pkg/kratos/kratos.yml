@@ -59,11 +59,8 @@ selfservice:
       ui_url: http://127.0.0.1:4455/settings
       privileged_session_max_age: 15m
       required_aal: highest_available
-<<<<<<< HEAD
       after:
         default_browser_return_url: http://127.0.0.1:3000/api/v1/kratos/update-user
-=======
->>>>>>> main
 
     recovery:
       enabled: true
