@@ -21,6 +21,7 @@ type AppConfig struct {
 	Secret        string `envconfig:"JWT_SECRET"`
 	DB            DBConfig
 	Kratos        KratosConfig
+	MQ            MQConfig
 }
 
 // GetConfig Collects all configs
