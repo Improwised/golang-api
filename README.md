@@ -9,6 +9,8 @@
 
 - [Migrations](#migrations)
 
+- [Kratos Integration](#kratos-integration)
+
 - [Messaging queue](#messaging-queue)
 
 - [Code Walk-through](#code-walk-through)
@@ -76,13 +78,32 @@ for ex: `start` commands run `go run app.go api` if your app.go is somewhere els
 
 Migrations are like **version control for your database**, allowing your team to define and share the application's database schema definition. If you have ever had to tell a teammate to manually add a column to their local database schema after pulling in your changes from source control, you've faced the problem that database migrations solve.
 
+## Kratos Integration
+Ory Kratos provides the user identity management service and different flows for user management (signup/sign in, forgot password, reset password, etc.). For more, you can see the official [documentation](https://www.ory.sh/docs/kratos/ory-kratos-intro).
+
+Ory Kratos doesn't provide UI, You have to specify the endpoints for different UI pages inside the configuration and Kratos will use them. There are some other services that you can use for demo UIs. for example `kratos-selfservice-ui-node`.
+
+**Note:** ory Kratos is an optional integration to the boilerplate, if you want to use it you need to follow the below steps.
+
+- Inside the ```.env``` you'll have to set the ```KRATOS_ENABLED``` for enabling the kratos integration.
+- According to your config requirements, you will need to change the corresponding files inside the ```/pkg/kratos``` folder. 
+- Then after that for all the endpoints you want Kratos authentication you'll have to add ```middlewares.Authenticated```. After that, you can add your own handle and write business logic over there using user details.
+- For more details, you can see the [documentation](./pkg/kratos/readme.md) section.
 
 ## Execution
 
-1. Run ```docker-compose up``` to spin up database and admire.
+1. Run ```docker-compose up``` to spin up the database and admire. In the case of a Kratos Enabled user this command ```docker-compose --profile kratos up```.
 2. Open ```localhost:8080```,  select **system** to ```PostgreSQL``` and put username and password.
 3. Build image using ```docker build -t golang-api .```
 4. Run ```docker run golang-api``` to run the container.
+
+**Another Way:**
+- For starting All services including kratos, runinng databse migrations and starting up golang server all together, run the script `local.sh` inside `/pkg/kratos`.
+    ```bash
+    cd pkg/kratos
+    ./local.sh
+    ```
+**Note:** Use this for local development environment.
 
 ### **Migrations**
 - **CREATE :** To create migrations i have discribed details in [Kick Start Commands](#kick-start-commands) section.

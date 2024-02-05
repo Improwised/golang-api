@@ -3,6 +3,7 @@ package v1
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/Improwised/golang-api/services"
 	"github.com/Improwised/golang-api/utils"
 	"github.com/doug-martin/goqu/v9"
+	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
@@ -21,6 +23,7 @@ import (
 
 type AuthController struct {
 	userService *services.UserService
+	userModel   *models.UserModel
 	logger      *zap.Logger
 	config      config.AppConfig
 }
@@ -35,6 +38,7 @@ func NewAuthController(goqu *goqu.Database, logger *zap.Logger, config config.Ap
 
 	return &AuthController{
 		userService: userSvc,
+		userModel:   &userModel,
 		logger:      logger,
 		config:      config,
 	}, nil
@@ -93,4 +97,61 @@ func (ctrl *AuthController) DoAuth(c *fiber.Ctx) error {
 	c.Cookie(userCookie)
 
 	return utils.JSONSuccess(c, http.StatusOK, user)
+}
+
+// DoKratosAuth authenticate user with kratos session id
+// swagger:route GET /kratos/auth Auth none
+//
+// Authenticate user with kratos session id.
+//
+//			Consumes:
+//			- application/json
+//
+//			Schemes: http, https
+//		Responses:
+//	      400: GenericResFailBadRequest
+//		  500: GenericResError
+func (ctrl *AuthController) DoKratosAuth(c *fiber.Ctx) error {
+	kratosID := c.Locals(constants.KratosID)
+
+	if kratosID.(string) == "" {
+		return utils.JSONError(c, http.StatusBadRequest, constants.ErrKratosIDEmpty)
+	}
+
+	kratosClient := resty.New().SetBaseURL(ctrl.config.Kratos.BaseUrl+"/sessions").SetHeader("Cookie", fmt.Sprintf("%v=%v", constants.KratosCookie, kratosID)).SetHeader("accept", "application/json")
+
+	kratosUser := config.KratosUserDetails{}
+	res, err := kratosClient.R().SetResult(&kratosUser).Get("/whoami")
+	if err != nil || res.StatusCode() != http.StatusOK {
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosAuth)
+	}
+
+	userStruct := models.User{}
+	userStruct.KratosID = kratosUser.Identity.ID
+	userStruct.FirstName = kratosUser.Identity.Traits.Name.First
+	userStruct.LastName = kratosUser.Identity.Traits.Name.Last
+	userStruct.Email = kratosUser.Identity.Traits.Email
+	userStruct.CreatedAt = kratosUser.Identity.CreatedAt
+	userStruct.UpdatedAt = kratosUser.Identity.UpdatedAt
+
+	err = ctrl.userModel.InsertKratosUser(userStruct)
+	if err != nil {
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosDataInsertion)
+	}
+
+	cookieExpirationTime, err := time.ParseDuration(ctrl.config.Kratos.CookieExpirationTime)
+	if err != nil {
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrKratosCookieTime)
+	}
+
+	userCookie := &fiber.Cookie{
+		Name:    constants.KratosCookie,
+		Value:   kratosID.(string),
+		Expires: time.Now().Add(cookieExpirationTime),
+	}
+
+	c.Cookie(userCookie)
+	c.Redirect(ctrl.config.Kratos.UIUrl)
+
+	return nil
 }

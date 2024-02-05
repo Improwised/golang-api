@@ -58,6 +58,30 @@
         }
       }
     },
+    "/kratos/auth": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate user with kratos session id.",
+        "operationId": "none",
+        "responses": {
+          "400": {
+            "$ref": "#/responses/GenericResFailBadRequest"
+          },
+          "500": {
+            "$ref": "#/responses/GenericResError"
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "consumes": [
@@ -375,6 +399,10 @@
                 "type": "string",
                 "x-go-name": "ID"
               },
+              "kratos_id": {
+                "type": "string",
+                "x-go-name": "KratosID"
+              },
               "last_name": {
                 "type": "string",
                 "x-go-name": "LastName"
@@ -424,6 +452,10 @@
                 "type": "string",
                 "x-go-name": "ID"
               },
+              "kratos_id": {
+                "type": "string",
+                "x-go-name": "KratosID"
+              },
               "last_name": {
                 "type": "string",
                 "x-go-name": "LastName"
@@ -472,6 +504,10 @@
               "id": {
                 "type": "string",
                 "x-go-name": "ID"
+              },
+              "kratos_id": {
+                "type": "string",
+                "x-go-name": "KratosID"
               },
               "last_name": {
                 "type": "string",

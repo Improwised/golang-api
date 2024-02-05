@@ -13,6 +13,15 @@ import (
 )
 
 func (m *Middleware) Authenticated(c *fiber.Ctx) error {
+	if m.config.Kratos.IsEnabled {
+		sessionID := c.Cookies("ory_kratos_session")
+		if sessionID == "" {
+			return utils.JSONFail(c, http.StatusUnauthorized, constants.Unauthenticated)
+		}
+		c.Locals(constants.KratosID, sessionID)
+		return c.Next()
+	}
+
 	token := c.Cookies(constants.CookieUser, "")
 	if token == "" {
 		return utils.JSONFail(c, http.StatusUnauthorized, constants.Unauthenticated)
