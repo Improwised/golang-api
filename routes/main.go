@@ -15,6 +15,7 @@ import (
 	"github.com/Improwised/golang-api/pkg/watermill"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/contrib/swagger"
 )
 
 var mu sync.Mutex
@@ -25,12 +26,13 @@ func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config confi
 
 	app.Use(middlewares.LogHandler(logger, pMetrics))
 
-	app.Static("/assets/", "./assets")
-
-	app.Get("/docs", func(c *fiber.Ctx) error {
-		return c.Render("./assets/index.html", fiber.Map{})
-	})
-
+	app.Use(swagger.New(swagger.Config{
+		BasePath: "/api/v1/",
+		FilePath: "./assets/swagger.json",
+		Path:     "docs",
+		Title:    "Swagger API Docs",
+	}))
+	
 	router := app.Group("/api")
 	v1 := router.Group("/v1")
 
