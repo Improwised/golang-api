@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/Improwised/golang-api/config"
 	"github.com/Improwised/golang-api/database"
+	helpers "github.com/Improwised/golang-api/helpers/flipt"
 	"github.com/Improwised/golang-api/pkg/events"
 	"github.com/Improwised/golang-api/pkg/watermill"
 	"github.com/Improwised/golang-api/routes"
@@ -44,13 +46,27 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 				return err
 			}
 
-			pub, err := watermill.InitPublisher(cfg,false)
+			pub, err := watermill.InitPublisher(cfg, false)
 			if err != nil {
 				return err
 			}
-			// setup routes
-			err = routes.Setup(app, db, logger, cfg, events, promMetrics, pub)
+
+			//
+			fc, err := helpers.FliptConnection(cfg.Flipt)
 			if err != nil {
+				if !(err.Error() == "flipt is not enabled") {
+					return err
+				}
+				fmt.Println("==================== checkpoint 1==========================")
+				logger.Error("error while connecting to flipt checkpoint 1", zap.Error(err))
+			}
+
+			// setup routes
+			err = routes.Setup(app, db, logger, cfg, events, promMetrics, pub, fc)
+
+			if err != nil {
+				fmt.Println("==================== checkpoint 2==========================")
+				logger.Error("error while connecting to flipt checkpoint 2", zap.Error(err))
 				return err
 			}
 
