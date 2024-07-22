@@ -66,7 +66,7 @@ for ex: `start` commands run `go run app.go api` if your app.go is somewhere els
 
 - **make install app_name={BINARY_NAME}**: It will generate optimized binary with `-s` and `-w` ldflags.
 
-- **make test** : To run testcase for entire project, `.env.testing` env need to use while writing testcase, you need to load 
+- **make test** : To run testcase for entire project, `.env.testing` env need to use while writing testcase, you need to load
 
 - **make test-wo-cache**: To run testcases with without cache.
 
@@ -86,9 +86,10 @@ Ory Kratos doesn't provide UI, You have to specify the endpoints for different U
 **Note:** ory Kratos is an optional integration to the boilerplate, if you want to use it you need to follow the below steps.
 
 - Inside the ```.env``` you'll have to set the ```KRATOS_ENABLED``` for enabling the kratos integration.
-- According to your config requirements, you will need to change the corresponding files inside the ```/pkg/kratos``` folder. 
+- According to your config requirements, you will need to change the corresponding files inside the ```/pkg/kratos``` folder.
 - Then after that for all the endpoints you want Kratos authentication you'll have to add ```middlewares.Authenticated```. After that, you can add your own handle and write business logic over there using user details.
 - For more details, you can see the [documentation](./pkg/kratos/readme.md) section.
+
 
 ## Execution
 
@@ -105,17 +106,29 @@ Ory Kratos doesn't provide UI, You have to specify the endpoints for different U
     ```
 **Note:** Use this for local development environment.
 
+
+## Flipt Integration
+Flipt is an open-source feature flag management tool that allows you to enable or disable features in your application without deploying new code. It provides a simple way to control the availability of features to your users, perform A/B testing, and gradually roll out new features.
+
+**Note:** Flipt is an optional integration to the boilerplate, if you want to use it you need to follow the below steps.
+
+1. Set the `FLIPT_ENABLED` environment variable to `true` to enable Flipt support.
+2. Set the `FLIPT_HOST` (e.g., `localhost`) and `FLIPT_PORT` (e.g., `9000`) environment variables to communicate with the Flipt backend.
+3. For setting up the ```Flipt``` service with other services, you have to execute ```docker-compose --profile flipt up```.
+4. Now you can access flipt UI on [http://localhost:8081](http://localhost:8081)
+- For more details, you can see the [documentation](./helpers/flipt/readme.md) section.
+
 ### **Migrations**
 - **CREATE :** To create migrations i have discribed details in [Kick Start Commands](#kick-start-commands) section.
 - **RUN :** To run migration there is two command `make migration-up` && `make migration-down`.
-- Migration needs `-- +migrate Up` and `-- +migrate Down` respectively in starting of files, this is required because we are using [sql-migrate](https://github.com/rubenv/sql-migrate) package 
+- Migration needs `-- +migrate Up` and `-- +migrate Down` respectively in starting of files, this is required because we are using [sql-migrate](https://github.com/rubenv/sql-migrate) package
 
 ### **Messaging Queue**
 - We are using [watermill](https://watermill.io/) package for messaging queue.
 - Watermill is a Golang library for working efficiently with message streams. It is intended for building event-driven applications.
 
 
-- #### Multiple Message Queue Broker Support 
+- #### Multiple Message Queue Broker Support
     - We are supporting 5 types of message queue broker at this time `rabbitmq`, `redis`, `googleCloud`,`sql(postgres,mysql)` & `kafka`
     - It allows us to switch to message queue broker without changing too much stuff.
     - Watermill package allows us to do that.
@@ -152,7 +165,7 @@ Ory Kratos doesn't provide UI, You have to specify the endpoints for different U
         ```
  - #### Command to run worker
     ```go
-    go run app.go worker --retry-delay 400 --retry-count 3 --topic user 
+    go run app.go worker --retry-delay 400 --retry-count 3 --topic user
     // --retry-delay 400 --retry-count 3 are optional
     // --retry-delay 400 means it will retry after 400ms
     // --retry-count 3 means it will retry 3 times
@@ -178,12 +191,12 @@ Ory Kratos doesn't provide UI, You have to specify the endpoints for different U
 - #### Dead Letter Queue
     - The `dead letter queue`, also known as the `poison queue` in watermill, is a designated destination for messages that have failed to undergo processing by a consumer.
     - The name of this queue is specified in the `DEAD_LETTER_QUEUE` environment variable, we are storing failed job into database.
-    - Command to run dead letter queue 
+    - Command to run dead letter queue
         ```go
         go run app.go dead-letter-queue
         ```
 
----    
+---
 ### **Code Walk-through**
 - #### Config:
     - We are using [envconfig](https://github.com/kelseyhightower/envconfig) which binds env values to struct elements.
@@ -254,7 +267,7 @@ Ory Kratos doesn't provide UI, You have to specify the endpoints for different U
     - `json` - in struct represent key name when it will be returned in json format.
     - `db` - represents name of database column, it's supported by `goqu` package.
     - `validate` - if you want to validate fields that are required you can set `validate:"required"`
-    - `omitempty` - this will be used with along side of json, if value will be empty then that element will be trimmed from response of json. 
+    - `omitempty` - this will be used with along side of json, if value will be empty then that element will be trimmed from response of json.
 - #### Controller:
     - As descirbed in [route](#route) controller init method should be call in route.
     - Each controller must have their struct which contains model object, that will be use to call function of models.
