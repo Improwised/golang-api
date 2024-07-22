@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"go.flipt.io/flipt-grpc"
 	"go.uber.org/zap"
 
 	"github.com/Improwised/golang-api/config"
@@ -22,7 +21,7 @@ import (
 var mu sync.Mutex
 
 // Setup func
-func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, events *events.Events, pMetrics *pMetrics.PrometheusMetrics, pub *watermill.WatermillPublisher, fc *flipt.FliptClient) error {
+func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config config.AppConfig, events *events.Events, pMetrics *pMetrics.PrometheusMetrics, pub *watermill.WatermillPublisher) error {
 	mu.Lock()
 
 	app.Use(middlewares.LogHandler(logger, pMetrics))
@@ -49,9 +48,8 @@ func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config confi
 		return err
 	}
 
-	err = healthCheckController(app, goqu, logger, fc)
+	err = healthCheckController(app, goqu, logger)
 	if err != nil {
-		fmt.Println("======================= checkpoit 2 ===============================")
 		return err
 	}
 
@@ -90,10 +88,9 @@ func setupUserController(v1 fiber.Router, goqu *goqu.Database, logger *zap.Logge
 	return nil
 }
 
-func healthCheckController(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, fc *flipt.FliptClient) error {
-	healthController, err := controller.NewHealthController(goqu, logger, fc)
+func healthCheckController(app *fiber.App, goqu *goqu.Database, logger *zap.Logger) error {
+	healthController, err := controller.NewHealthController(goqu, logger)
 	if err != nil {
-		fmt.Println("======================= checkpoit 3 ===============================")
 		return err
 	}
 

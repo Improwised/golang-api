@@ -9,11 +9,16 @@ import (
 	"google.golang.org/grpc"
 )
 
+var (
+	fliptClient flipt.FliptClient
+	initError   error
+)
+
 type BooleanFlagResponse struct {
 	Key         string `json:"key"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Enabled     bool   `json:"enabled,omitempty"` // Use a pointer to handle optional field
+	Enabled     bool   `json:"enabled,omitempty"`
 }
 
 type Context struct {
@@ -23,40 +28,52 @@ type Context struct {
 
 type VarientFlagResponse struct {
 	RequestContext Context `json:"request_context"`
-	Match          bool    `json:"match,omitempty"` // Use pointer to handle optional field
+	Match          bool    `json:"match,omitempty"`
 	FlagKey        string  `json:"flag_key"`
-	SegmentKey     string  `json:"segment_key,omitempty"` // Use pointer to handle optional field
-	Value          string  `json:"value,omitempty"`       // Use pointer to handle optional field
-
+	SegmentKey     string  `json:"segment_key,omitempty"`
+	Value          string  `json:"value,omitempty"`
 }
 
-func FliptConnection(cfg config.FliptConfig) (*flipt.FliptClient, error) {
-
+// InitFlizentClient make connection to flipt server and return flipt client if flipt functionality is enabled
+func InitFliptClient() error {
+	cfg := config.AllConfig.Flipt
 	if !cfg.Enabled {
-		return nil, fmt.Errorf("flipt is not enabled")
+		initError = fmt.Errorf("flipt is not enabled")
+		return initError
 	}
 
 	fliptServer := cfg.Host + ":" + cfg.Port
 	conn, err := grpc.Dial(fliptServer, grpc.WithInsecure())
 	if err != nil {
-		return nil, err
+		initError = err
+		return initError
 	}
 
-	client := flipt.NewFliptClient(conn)
-	return &client, nil
+	fliptClient = flipt.NewFliptClient(conn)
+	return nil
 }
 
-func GetBooleanFlag(fc flipt.FliptClient, bool_flag string) (BooleanFlagResponse, error) {
+// GetBooleanFlag get boolean flag from flipt server by flag key
+func GetBooleanFlag(flagKey string) (BooleanFlagResponse, error) {
+
+	// check error while initializing flipt client
+	if initError != nil {
+		if config.AllConfig.Flipt.Enabled {
+			return BooleanFlagResponse{}, initError
+		}
+		return BooleanFlagResponse{}, nil
+	}
+
 	var response BooleanFlagResponse
-	flagResp, err := fc.GetFlag(context.Background(), &flipt.GetFlagRequest{
-		Key: bool_flag,
+	flagResp, err := fliptClient.GetFlag(context.Background(), &flipt.GetFlagRequest{
+		Key: flagKey,
 	})
 	if err != nil {
-		return BooleanFlagResponse{}, err
+		return BooleanFlagResponse{}, fmt.Errorf("failed to get flag: %w", err)
 	}
 
 	if flagResp == nil {
-		return BooleanFlagResponse{}, fmt.Errorf("flag response is nil")
+		return BooleanFlagResponse{}, fmt.Errorf("flag is not found")
 	}
 
 	response.Name = flagResp.Name
@@ -68,15 +85,25 @@ func GetBooleanFlag(fc flipt.FliptClient, bool_flag string) (BooleanFlagResponse
 	return response, nil
 }
 
-func GetVarientFlag(fc flipt.FliptClient, flagKey string, entityId string, contextMap map[string]string) (VarientFlagResponse, error) {
+// GetVarientFlag get varient flag from flipt server by flagKey and constraint(contextMap)
+func GetVarientFlag(flagKey string, entityId string, contextMap map[string]string) (VarientFlagResponse, error) {
+
+	// check error while initializing flipt client
+	if initError != nil {
+		if config.AllConfig.Flipt.Enabled {
+			return VarientFlagResponse{}, initError
+		}
+		return VarientFlagResponse{}, nil
+	}
+
 	var response VarientFlagResponse
-	resp, err := fc.Evaluate(context.Background(), &flipt.EvaluationRequest{
+	resp, err := fliptClient.Evaluate(context.Background(), &flipt.EvaluationRequest{
 		FlagKey:  flagKey,
 		EntityId: entityId,
 		Context:  contextMap,
 	})
 	if err != nil {
-		return VarientFlagResponse{}, err
+		return VarientFlagResponse{}, fmt.Errorf("failed to evaluate flag: %w", err)
 	}
 
 	if resp == nil {

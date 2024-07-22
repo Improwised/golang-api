@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -51,22 +50,19 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 				return err
 			}
 
-			//
-			fc, err := helpers.FliptConnection(cfg.Flipt)
+			// Initialize Flipt client for flipt functionality
+			err = helpers.InitFliptClient()
 			if err != nil {
-				if !(err.Error() == "flipt is not enabled") {
+				logger.Error("Error while initlize client", zap.Error(err))
+				if err.Error() != "flipt is not enabled" {
 					return err
 				}
-				fmt.Println("==================== checkpoint 1==========================")
-				logger.Error("error while connecting to flipt checkpoint 1", zap.Error(err))
 			}
 
 			// setup routes
-			err = routes.Setup(app, db, logger, cfg, events, promMetrics, pub, fc)
+			err = routes.Setup(app, db, logger, cfg, events, promMetrics, pub)
 
 			if err != nil {
-				fmt.Println("==================== checkpoint 2==========================")
-				logger.Error("error while connecting to flipt checkpoint 2", zap.Error(err))
 				return err
 			}
 
