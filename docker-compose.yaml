@@ -63,7 +63,7 @@ services:
       - FLIPT_LOG_LEVEL=debug
       - FLIPT_META_TELEMETRY_ENABLED=false
     volumes:
-      - "./flipt.yml:/flipt.yml"
+      - "./helpers/flipt/flipt.yml:/flipt.yml"
       - "flipt_data:/var/opt/flipt"
 
   flipt:

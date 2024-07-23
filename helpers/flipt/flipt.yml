@@ -1,0 +1,37 @@
+namespace: default
+flags:
+  - key: advertisement
+    name: advertisement
+    description: This flag is used to enable/disable advertisement
+    enabled: true
+    type: BOOLEAN_FLAG_TYPE
+
+  - key: color
+    name: color
+    description: This flag is used to enable/disable color
+    enabled: true
+    type: VARIANT_FLAG_TYPE
+    variants:
+      - key: orange
+        name: orange
+        description: This variant is used to enable/disable orange
+      - key: green
+        name: green
+        description: This variant is used to enable/disable green
+    rules:
+      - segment: countrys
+        distributions:
+          - variant: orange
+            rollout: 100
+
+segments:
+  - key: countrys
+    name: countrys
+    match_type: ANY_MATCH_TYPE
+    description: This segment is used to match country
+    constraints:
+      - property: country
+        operator: eq
+        value: ind
+        type: STRING_COMPARISON_TYPE
+        description: This constraint is used to match country india

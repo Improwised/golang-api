@@ -53,7 +53,7 @@ func GetAPICommandDef(cfg config.AppConfig, logger *zap.Logger) cobra.Command {
 			// Initialize Flipt client for flipt functionality
 			err = helpers.InitFliptClient()
 			if err != nil {
-				logger.Error("Error while initlize client", zap.Error(err))
+				logger.Error("Error while initialize client", zap.Error(err))
 				if err.Error() != "flipt is not enabled" {
 					return err
 				}
