@@ -71,7 +71,6 @@ func (hc *HealthController) Db(ctx *fiber.Ctx) error {
 		hc.logger.Error("error while health checking of db", zap.Error(err))
 		return utils.JSONError(ctx, http.StatusInternalServerError, constants.ErrHealthCheckDb)
 	}
-
 	return utils.JSONSuccess(ctx, http.StatusOK, "ok")
 }
 

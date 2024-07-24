@@ -14,8 +14,8 @@ import (
 	pMetrics "github.com/Improwised/golang-api/pkg/prometheus"
 	"github.com/Improwised/golang-api/pkg/watermill"
 	"github.com/doug-martin/goqu/v9"
-	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/contrib/swagger"
+	"github.com/gofiber/fiber/v2"
 )
 
 var mu sync.Mutex
@@ -32,7 +32,7 @@ func Setup(app *fiber.App, goqu *goqu.Database, logger *zap.Logger, config confi
 		Path:     "docs",
 		Title:    "Swagger API Docs",
 	}))
-	
+
 	router := app.Group("/api")
 	v1 := router.Group("/v1")
 

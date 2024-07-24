@@ -22,6 +22,7 @@ type AppConfig struct {
 	DB            DBConfig
 	Kratos        KratosConfig
 	MQ            MQConfig
+	Flipt         FliptConfig
 }
 
 // GetConfig Collects all configs

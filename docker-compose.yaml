@@ -55,5 +55,32 @@ services:
     volumes:
       - "./pkg/kratos:/etc/config/kratos"
 
+  init:
+    image: flipt/flipt:latest
+    profiles: [flipt]
+    command: ["./flipt", "import", "flipt.yml"]
+    environment:
+      - FLIPT_LOG_LEVEL=debug
+      - FLIPT_META_TELEMETRY_ENABLED=false
+    volumes:
+      - "./helpers/flipt/flipt.yml:/flipt.yml"
+      - "flipt_data:/var/opt/flipt"
+
+  flipt:
+    image: flipt/flipt:latest
+    profiles: [flipt]
+    command: ["./flipt"]
+    depends_on:
+      - init
+    ports:
+      - "8081:8080"
+      - "9000:9000"
+    environment:
+      - FLIPT_LOG_LEVEL=debug
+      - FLIPT_META_TELEMETRY_ENABLED=false
+    volumes:
+      - "flipt_data:/var/opt/flipt"
+
 volumes:
   pgdata:
+  flipt_data:
