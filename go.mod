@@ -33,7 +33,7 @@ require (
 	github.com/rubenv/sql-migrate v1.5.2
 	github.com/samber/lo v1.38.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.8.4
 	go.flipt.io/flipt-grpc v1.11.0
 	go.uber.org/zap v1.24.0
