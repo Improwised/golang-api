@@ -39,6 +39,10 @@
     ### `go mod tidy`
 - Please make sure you set proper database configuration to connect.
 ---
+### Add Storage Drivers
+- Ref : [gofiber storage](https://docs.gofiber.io/storage/)
+
+---
 ### **Multiple Database System Support**
 
 - We are supporting 3 types of database at this time `postgres`, `mysql` & `sqlite3`
