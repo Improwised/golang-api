@@ -25,7 +25,7 @@ RUN --mount=type=cache,mode=0777,target=${GOCACHE} \
     --mount=type=cache,mode=0777,target=${GOMODCACHE} \
     go build -o /tmp/app
 
-FROM alpine 
+FROM alpine
 WORKDIR /app
 
 ENV MODE="docker"

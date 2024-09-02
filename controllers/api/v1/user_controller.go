@@ -100,7 +100,7 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.JSONFail(c, http.StatusBadRequest, utils.ValidatorErrorString(err))
 	}
-	
+
 	user, err := ctrl.userService.RegisterUser(models.User{FirstName: userReq.FirstName, LastName: userReq.LastName, Email: userReq.Email, Password: userReq.Password, Roles: userReq.Roles}, ctrl.event)
 	if err != nil {
 		ctrl.logger.Error("error while insert user", zap.Error(err))

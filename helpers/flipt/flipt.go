@@ -5,13 +5,17 @@ import (
 	"fmt"
 
 	"github.com/Improwised/golang-api/config"
-	flipt "go.flipt.io/flipt-grpc"
+	flipt "go.flipt.io/flipt/rpc/flipt"
+	"go.flipt.io/flipt/rpc/flipt/evaluation"
+	sdk "go.flipt.io/flipt/sdk/go"
+	fliptgrpc "go.flipt.io/flipt/sdk/go/grpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
-	fliptClient flipt.FliptClient
-	initError   error
+	fliptSdkClient sdk.SDK
+	initError      error
 )
 
 type BooleanFlagResponse struct {
@@ -43,13 +47,14 @@ func InitFliptClient() error {
 	}
 
 	fliptServer := cfg.Host + ":" + cfg.Port
-	conn, err := grpc.Dial(fliptServer, grpc.WithInsecure())
+	conn, err := grpc.NewClient(fliptServer, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		initError = err
 		return initError
 	}
 
-	fliptClient = flipt.NewFliptClient(conn)
+	transport := fliptgrpc.NewTransport(conn)
+	fliptSdkClient = sdk.New(transport)
 	return nil
 }
 
@@ -65,6 +70,7 @@ func GetBooleanFlag(flagKey string) (BooleanFlagResponse, error) {
 	}
 
 	var response BooleanFlagResponse
+	fliptClient := fliptSdkClient.Flipt()
 	flagResp, err := fliptClient.GetFlag(context.Background(), &flipt.GetFlagRequest{
 		Key: flagKey,
 	})
@@ -97,7 +103,8 @@ func GetVarientFlag(flagKey string, entityId string, contextMap map[string]strin
 	}
 
 	var response VarientFlagResponse
-	resp, err := fliptClient.Evaluate(context.Background(), &flipt.EvaluationRequest{
+	fliptClient := fliptSdkClient.Evaluation()
+	resp, err := fliptClient.Variant(context.Background(), &evaluation.EvaluationRequest{
 		FlagKey:  flagKey,
 		EntityId: entityId,
 		Context:  contextMap,
@@ -115,8 +122,8 @@ func GetVarientFlag(flagKey string, entityId string, contextMap map[string]strin
 
 	if resp.Match {
 		response.Match = resp.Match
-		response.SegmentKey = resp.SegmentKey
-		response.Value = resp.Value
+		response.SegmentKey = resp.SegmentKeys[0]
+		response.Value = resp.VariantKey
 	}
 
 	return response, nil

@@ -15,11 +15,12 @@ import (
 )
 
 // custom schema for mysql database
-// source: https://github.com/ThreeDotsLabs/watermill-sql/blob/master/pkg/sql/schema_adapter_mysql.go 
+// source: https://github.com/ThreeDotsLabs/watermill-sql/blob/master/pkg/sql/schema_adapter_mysql.go
 type MySQLSchema struct {
 	GenerateMessagesTableName func(topic string) string
-	SubscribeBatchSize int
+	SubscribeBatchSize        int
 }
+
 func (s MySQLSchema) SchemaInitializingQueries(topic string) []string {
 	createMessagesTable := strings.Join([]string{
 		"CREATE TABLE IF NOT EXISTS " + s.MessagesTable(topic) + " (",
@@ -61,9 +62,9 @@ func (s MySQLSchema) SelectQuery(topic string, consumerGroup string, offsetsAdap
 	nextOffsetQuery, nextOffsetArgs := offsetsAdapter.NextOffsetQuery(topic, consumerGroup)
 	selectQuery := `
 		SELECT offset, uuid, payload, metadata FROM ` + s.MessagesTable(topic) + `
-		WHERE 
+		WHERE
 			offset > (` + nextOffsetQuery + `)
-		ORDER BY 
+		ORDER BY
 			offset ASC
 		LIMIT ` + fmt.Sprintf("%d", s.batchSize())
 
