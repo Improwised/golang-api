@@ -19,11 +19,11 @@ import (
 
 type PostgreSQLSchema struct {
 	GenerateMessagesTableName func(topic string) string
-	SubscribeBatchSize int
+	SubscribeBatchSize        int
 }
 
 func (s PostgreSQLSchema) SchemaInitializingQueries(topic string) []string {
-	createMessagesTable := ` 
+	createMessagesTable := `
 		CREATE TABLE IF NOT EXISTS ` + s.MessagesTable(topic) + ` (
 			"offset" SERIAL,
 			"uuid" VARCHAR(36) NOT NULL,
@@ -97,17 +97,17 @@ func (s PostgreSQLSchema) SelectQuery(topic string, consumerGroup string, offset
 
 		SELECT "offset", transaction_id, uuid, payload, metadata FROM ` + s.MessagesTable(topic) + `
 
-		WHERE 
+		WHERE
 		(
 			(
-				transaction_id = (SELECT last_processed_transaction_id FROM last_processed) 
-				AND 
+				transaction_id = (SELECT last_processed_transaction_id FROM last_processed)
+				AND
 				"offset" > (SELECT offset_acked FROM last_processed)
 			)
 			OR
 			(transaction_id > (SELECT last_processed_transaction_id FROM last_processed))
 		)
-		AND 
+		AND
 			transaction_id < pg_snapshot_xmin(pg_current_snapshot())
 		ORDER BY
 			transaction_id ASC,

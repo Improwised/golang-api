@@ -45,5 +45,5 @@ test-wo-cache: clean-test-cache test
 build:
 	go build -o=$(app_name) .
 
-install: 
+install:
 	go build -ldflags="-s -w" -o=$(app_name) .

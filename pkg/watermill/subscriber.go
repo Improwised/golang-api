@@ -90,7 +90,7 @@ func (ws *WatermillSubscriber) InitRouter(cfg config.AppConfig, delayTime, MaxRe
 	return ws, nil
 }
 
-func (ws *WatermillSubscriber) Run(topic,handlerName string ,handlerFunc message.NoPublishHandlerFunc) error {
+func (ws *WatermillSubscriber) Run(topic, handlerName string, handlerFunc message.NoPublishHandlerFunc) error {
 	if ws.Subscriber == nil {
 		return fmt.Errorf("subscriber is nil")
 	}

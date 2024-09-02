@@ -11,11 +11,11 @@ For configuring kratos according to the requirements you'll have to update file 
 ## Configuration
 1. You'll have to set ```KRATOS_ENABLED``` environment variable to `true` to enable Kratos support.
 2. For all configuration values of ```kratos.yml``` there are environment variables.
-    
+
     **Note:** Environment variables get higher priority than file configuration values. So make sure before changing values directly from the file.
 
     - Those environment variables are in a pre-defined format so if you want to add some config values you'll have to follow the format.
-        
+
         - The format is hierarchical and appends each key by `_`.
         - let's take an example to understand it better.
             ```yaml
@@ -27,8 +27,8 @@ For configuring kratos according to the requirements you'll have to update file 
                         - id: bar
             ```
             The above values can be set using the following environment variables.
-            
-            ```SOME_NESTED_KEY_WITH_A_VALUE=value``` 
+
+            ```SOME_NESTED_KEY_WITH_A_VALUE=value```
             ```SOME_NESTED_KEY_AND_ARRAY_0_ID=foo```
             ```SOME_NESTED_KEY_AND_ARRAY_1_ID=bar```
 
@@ -40,7 +40,7 @@ For configuring kratos according to the requirements you'll have to update file 
     - For adding support of different oidc providers for social sign-in, You first need to add the jsonnet file inside `/pkg/kratos/oidc` folder. You can find the corresponding jsonnets and details [here](https://www.ory.sh/docs/kratos/social-signin/generic).
 
     - Base64 this jsonnet schema using below command and then replace it inside the `kratos.yml` configuration.
-        - ```bash 
+        - ```bash
              base64 -w 0 <provider>.schema.jsonnet
             ```
         - As an example, There is Google provider already enabled.
@@ -49,7 +49,7 @@ For configuring kratos according to the requirements you'll have to update file 
     - For setting up OAuth 2.O using Google see the steps [here](https://support.google.com/cloud/answer/6158849?hl=en).
 
 3. For Kratos schema configuration you have to edit the ```identity.schema.json```. This will change the user schema.
-    
+
     - Use this in case you want specific details in the registration form to get it from the user.
 
     - After changing the Kratos schema, You'll need to edit the **user** struct and database migrations, so that you can store user details into the database.
@@ -81,8 +81,8 @@ So, the flow will be,
 
 1. On initialization of user identity activities call kratos with specific functionality endpoint.
 2. After that kratos will redirect to the respective UI url provided by you inside the configuration file with `flow_id` in query param.
-3. After that on Submit you have to call the kratos with same flow_id as query param and `Form Data` in payload. 
-4. Then kratos will redirect to the `default_return_url` provided into the configuration. (*In case of registration and login, kratos will redirect to backend and then backend will store the data and set up cookie for the frontend.)    
+3. After that on Submit you have to call the kratos with same flow_id as query param and `Form Data` in payload.
+4. Then kratos will redirect to the `default_return_url` provided into the configuration. (*In case of registration and login, kratos will redirect to backend and then backend will store the data and set up cookie for the frontend.)
 
 After successful authentication, it will redirect to the backend Endpoint using which we can store user details in our database.
 
