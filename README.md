@@ -1,5 +1,6 @@
 # Golang BoilerPlater
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/Improwised/golang-api)](https://goreportcard.com/report/github.com/Improwised/golang-api)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/Improwised/golang-api)](https://github.com/Improwised/golang-api/blob/main/go.mod#L3)
 ### **Index**
 - [Introduction](#introduction)
 
