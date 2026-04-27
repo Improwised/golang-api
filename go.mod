@@ -32,9 +32,9 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/rubenv/sql-migrate v1.5.2
 	github.com/samber/lo v1.38.1
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.7.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.10.0
 	go.flipt.io/flipt-grpc v1.11.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.18.0
@@ -135,7 +135,7 @@ require (
 	github.com/sony/gobreaker v0.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.50.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
