@@ -1,8 +1,6 @@
 module github.com/Improwised/golang-api
 
-go 1.21
-
-toolchain go1.21.6
+go 1.24.0
 
 require (
 	clevergo.tech/jsend v1.1.3
@@ -18,7 +16,7 @@ require (
 	github.com/doug-martin/goqu/v9 v9.18.0
 	github.com/getsentry/sentry-go v0.35.0
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/go-sql-driver/mysql v1.7.1
+	github.com/go-sql-driver/mysql v1.10.0
 	github.com/gofiber/adaptor/v2 v2.2.1
 	github.com/gofiber/fiber/v2 v2.51.0
 	github.com/joho/godotenv v1.5.1
@@ -43,6 +41,7 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/go-openapi/analysis v0.21.4 // indirect
 	github.com/go-openapi/errors v0.20.3 // indirect
