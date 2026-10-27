@@ -61,6 +61,18 @@ func NewUserController(goqu *goqu.Database, logger *zap.Logger, event *events.Ev
 //		  500: GenericResError
 func (ctrl *UserController) GetUser(c *fiber.Ctx) error {
 	userID := c.Params(constants.ParamUid)
+
+	// Users may only read their own record; without this any signed-in user
+	// could fetch every other user's profile by id.
+	callerID, err := ctrl.callerID(c)
+	if err != nil {
+		ctrl.logger.Error("error while resolving authenticated user", zap.Error(err))
+		return utils.JSONError(c, http.StatusInternalServerError, constants.ErrGetUser)
+	}
+	if callerID == "" || callerID != userID {
+		return utils.JSONFail(c, http.StatusForbidden, constants.Unauthenticated)
+	}
+
 	user, err := ctrl.userService.GetUser(userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -115,4 +127,23 @@ func (ctrl *UserController) CreateUser(c *fiber.Ctx) error {
 	}
 
 	return utils.JSONSuccess(c, http.StatusCreated, user)
+}
+
+// callerID returns the local user id of the authenticated request: the JWT
+// subject, or the user linked to the verified Kratos identity.
+func (ctrl *UserController) callerID(c *fiber.Ctx) (string, error) {
+	if uid, ok := c.Locals(constants.ContextUid).(string); ok && uid != "" {
+		return uid, nil
+	}
+
+	kratosID, ok := c.Locals(constants.KratosIdentityID).(string)
+	if !ok || kratosID == "" {
+		return "", nil
+	}
+
+	user, err := ctrl.userService.GetUserByKratosID(kratosID)
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
+	return user.ID, err
 }

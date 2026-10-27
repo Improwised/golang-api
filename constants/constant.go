@@ -2,7 +2,7 @@ package constants
 
 // variables
 const (
-	CookieUser = "user"
+	CookieUser   = "user"
 	KratosCookie = "ory_kratos_session"
 )
 
@@ -14,8 +14,11 @@ const (
 // kratos
 const (
 	KratosID = "kratosId"
+	// KratosIdentityID holds the Kratos identity of a verified session
+	KratosIdentityID  = "kratosIdentityId"
 	KratosUserDetails = "kratosUserDetails"
 )
+
 // params
 const (
 	ParamUid = "userId"
@@ -43,7 +46,7 @@ const (
 	ErrKratosAuth          = "error while fetching user from kratos"
 	ErrKratosDataInsertion = "error while inserting user data came from kratos"
 	ErrKratosIDEmpty       = "error no session_id found in kratos cookie"
-	ErrKratosCookieTime   = "error while parsing the expiration time of the cookie"
+	ErrKratosCookieTime    = "error while parsing the expiration time of the cookie"
 )
 
 // Events

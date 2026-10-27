@@ -69,6 +69,29 @@ func (model *UserModel) GetById(id string) (User, error) {
 	return user, err
 }
 
+// GetByKratosID retrieves the user linked to a Kratos identity
+func (model *UserModel) GetByKratosID(kratosID string) (User, error) {
+	user := User{}
+	found, err := model.db.From(UserTable).Where(goqu.Ex{
+		"kratos_id": kratosID,
+	}).Select(
+		"id",
+		"first_name",
+		"last_name",
+		"email",
+	).ScanStruct(&user)
+
+	if err != nil {
+		return user, err
+	}
+
+	if !found {
+		return user, sql.ErrNoRows
+	}
+
+	return user, err
+}
+
 // InsertUser retrieve user
 func (model *UserModel) InsertUser(user User) (User, error) {
 	user.ID = xid.New().String()
