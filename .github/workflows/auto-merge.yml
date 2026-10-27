@@ -3,8 +3,15 @@ name: auto-merge
 on:
 - pull_request_target
 
+# pull_request_target runs with a write-capable token for every PR, forks
+# included; only act on Dependabot PRs and grant just what merging needs.
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   auto-merge:
+    if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

@@ -40,8 +40,17 @@ func GetConfig() AppConfig {
 		log.Fatal(err)
 	}
 
+	// The example secret is public; signing production tokens with it would
+	// let anyone forge them.
+	if !AllConfig.IsDevelopment && AllConfig.Secret == exampleJWTSecret {
+		log.Fatal("JWT_SECRET is still the example value; set a unique secret")
+	}
+
 	return AllConfig
 }
+
+// exampleJWTSecret is the placeholder shipped in .env.example
+const exampleJWTSecret = "ThisIsKey"
 
 // GetConfigByName Collects all configs
 func GetConfigByName(key string) string {

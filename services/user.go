@@ -32,6 +32,10 @@ func (userSvc *UserService) GetUser(userId string) (models.User, error) {
 	return user, err
 }
 
+func (userSvc *UserService) GetUserByKratosID(kratosID string) (models.User, error) {
+	return userSvc.userModel.GetByKratosID(kratosID)
+}
+
 // Authenticate verify identity using email, and password.
 // On successful validtion it'll return the user
 func (userSvc *UserService) Authenticate(email, password string) (models.User, error) {
